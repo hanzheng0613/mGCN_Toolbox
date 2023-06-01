@@ -54,7 +54,7 @@ class LayeredNetworkGraph(object):
         # book-keeping
         self.graphs = graphs
         
-        self.graphs_attribute = attribute
+        self.graphs_attribute = graphs_attribute
         self.layout = layout
         self.node_rwoc = self.random_walk_occupation_centrality(self.graphs_attribute)
         self.get_nodes_and_edges_layout()
