@@ -19,7 +19,7 @@ import holoviews as hv
 
 from process import*
 
-from visualization.multilayer_graph import LayeredNetworkGraph
+from mGCN_Toolbox.visualization.multilayer_graph import LayeredNetworkGraph
 
 from torch_geometric.utils import from_scipy_sparse_matrix
 from torch_geometric.data import Data
@@ -31,7 +31,7 @@ class dataset():
         self.dataname = dataname
         self.dataset, self.num_dims,  self.num_classes, self.labels, self.adj_list, self.edge_list = self.load_data(self.dataname)
         
-        self.visualization = self.visualization(self.dataname)
+        #self.visualization = self.visualization(self.dataname)
 
         #self.dataset, self.num_dims, self.training_id, self.valid_id, self.test_id, self.num_classes, self.labels, #self.adj_list, self.edge_list = self.load_data(self.dataname, self.train_percent, self.valid_percent)
         
