@@ -51,19 +51,19 @@ class dataset():
         #return training_id, valid_id, test_id
 
     def load_data(self, dataname):
-
         if self.dataname == 'amazon':
             data_filename = './data/amazon/amazon.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon(data_filename)
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon()
         elif self.dataname == 'acm':
             data_filename = './data/acm/acm.mat'
             embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_acm_mat()
         elif self.dataname == 'imdb':
             data_filename = './data/imdb/imdb.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb(data_filename)
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb()
         elif self.dataname == 'dblp':
             data_filename = './data/dblp/dblp.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp(data_filename)
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp()
+            
         embed_matrix = preprocess_features(embed_matrix)
         adj_list = [normalize_adj(adj) for adj in adj_list]
         adj_list = [sparse_mx_to_torch_sparse_tensor(adj) for adj in adj_list]
