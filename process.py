@@ -33,13 +33,13 @@ def load_acm_mat():
 
 
 
-def load_dblp(sc=3):
-    data = pkl.load(open("mGCN_Toolbox/data/dblp.pkl", "rb"))
+def load_dblp():
+    data = pkl.load(open("mGCN_Toolbox/data/dblp/dblp.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*sc
-    adj2 = data["PPrefP"] + np.eye(data["PPrefP"].shape[0])*sc
-    adj3 = data["PATAP"] + np.eye(data["PATAP"].shape[0])*sc
+    adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*3
+    adj2 = data["PPrefP"] + np.eye(data["PPrefP"].shape[0])*3
+    adj3 = data["PATAP"] + np.eye(data["PATAP"].shape[0])*3
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -57,12 +57,12 @@ def load_dblp(sc=3):
     return adj_list, truefeatures, label, idx_train, idx_val, idx_test
 
 
-def load_imdb(sc=3):
-    data = pkl.load(open("mGCN_Toolbox/data/imdb.pkl", "rb"))
+def load_imdb():
+    data = pkl.load(open("mGCN_Toolbox/data/imdb/imdb.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["MDM"] + np.eye(data["MDM"].shape[0])*sc
-    adj2 = data["MAM"] + np.eye(data["MAM"].shape[0])*sc
+    adj1 = data["MDM"] + np.eye(data["MDM"].shape[0])*3
+    adj2 = data["MAM"] + np.eye(data["MAM"].shape[0])*3
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -79,13 +79,13 @@ def load_imdb(sc=3):
     return adj_list, truefeatures, label, idx_train, idx_val, idx_test
 
 
-def load_amazon(sc=3):
-    data = pkl.load(open("mGCN_Toolbox/data/amazon.pkl", "rb"))
+def load_amazon():
+    data = pkl.load(open("mGCN_Toolbox/data/amazon/amazon.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["IVI"] + np.eye(data["IVI"].shape[0])*sc
-    adj2 = data["IBI"] + np.eye(data["IBI"].shape[0])*sc
-    adj3 = data["IOI"] + np.eye(data["IOI"].shape[0])*sc
+    adj1 = data["IVI"] + np.eye(data["IVI"].shape[0])*3
+    adj2 = data["IBI"] + np.eye(data["IBI"].shape[0])*3
+    adj3 = data["IOI"] + np.eye(data["IOI"].shape[0])*3
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
