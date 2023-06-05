@@ -204,7 +204,7 @@ def split_node_data(node_num, train_percent, valid_percent):
         
     return training_id, valid_id, test_id
 
-def split_link_data(data, test_view, neg_k, multi=False, R=0):
+def split_link_data(data, test_view, neg_k, multi=False):
 
     if multi:
         split_edge = []
@@ -217,13 +217,6 @@ def split_link_data(data, test_view, neg_k, multi=False, R=0):
             else:
                 temp = get_edges(data.x, data.edge_index[i])
             split_edge.append(temp)
-        if R > 0:
-            candidate_edges = get_masked(data.x, data.edge_index[test_view], R, split_edge[test_view]['test']['edge'].numpy())
-            print("The number of overlapping candidate edges:")
-            print(intersect2D(candidate_edges.numpy(), to_undirected(split_edge[test_view]['test']['edge'].transpose(0,1)).transpose(0,1).numpy()))
-            print(len(candidate_edges))
-            print(len(split_edge[test_view]['test']['edge']))
-            return data, split_edge, candidate_edges
     else:
         split_edge = mask_test_edges(data.x, data.edge_index[test_view], neg_k)
         data.edge_index[test_view] = split_edge['train']['edge'].t()
