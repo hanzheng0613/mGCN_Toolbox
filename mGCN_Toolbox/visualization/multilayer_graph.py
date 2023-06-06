@@ -14,7 +14,7 @@ import scipy.sparse as sp
 
 import holoviews as hv
 
-from process import *
+from mGCN_Toolbox.visualization.process import *
 
 
 
