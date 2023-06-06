@@ -17,7 +17,7 @@ import scipy.sparse as sp
 import holoviews as hv
 
 
-from process import*
+from mGCN_Toolbox.utils.process import*
 
 from mGCN_Toolbox.visualization.multilayer_graph import LayeredNetworkGraph
 
@@ -53,16 +53,16 @@ class dataset():
     def load_data(self, dataname):
         if self.dataname == 'amazon':
             data_filename = './data/amazon/amazon.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon()
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon(3)
         elif self.dataname == 'acm':
             data_filename = './data/acm/acm.mat'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_acm_mat()
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_acm_mat(3)
         elif self.dataname == 'imdb':
             data_filename = './data/imdb/imdb.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb()
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb(3)
         elif self.dataname == 'dblp':
             data_filename = './data/dblp/dblp.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp()
+            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp(3)
             
         embed_matrix = preprocess_features(embed_matrix)
         adj_list = [normalize_adj(adj) for adj in adj_list]

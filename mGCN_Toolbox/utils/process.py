@@ -7,13 +7,13 @@ import scipy.sparse as sp
 from torch_geometric.utils import from_scipy_sparse_matrix
 from torch_geometric.utils import to_undirected
 
-def load_acm_mat():
-    data = sio.loadmat('data/acm/acm.mat')
+def load_acm_mat(sc=3):
+    data = sio.loadmat('mGCN_Toolbox/data/acm/acm.mat')
     label = data['label']
     
 
-    adj1 = data["PLP"] + np.eye(data["PLP"].shape[0])*3
-    adj2 = data["PAP"] + np.eye(data["PAP"].shape[0])*3
+    adj1 = data["PLP"] + np.eye(data["PLP"].shape[0])*sc
+    adj2 = data["PAP"] + np.eye(data["PAP"].shape[0])*sc
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -33,13 +33,13 @@ def load_acm_mat():
 
 
 
-def load_dblp():
-    data = pkl.load(open("data/dblp/dblp.pkl", "rb"))
+def load_dblp(sc=3):
+    data = pkl.load(open("mGCN_Toolbox/data/dblp/dblp.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*3
-    adj2 = data["PPrefP"] + np.eye(data["PPrefP"].shape[0])*3
-    adj3 = data["PATAP"] + np.eye(data["PATAP"].shape[0])*3
+    adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*sc
+    adj2 = data["PPrefP"] + np.eye(data["PPrefP"].shape[0])*sc
+    adj3 = data["PATAP"] + np.eye(data["PATAP"].shape[0])*sc
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -59,12 +59,12 @@ def load_dblp():
     return truefeatures, edge_index, len(edge_index), label, idx_train, idx_val, idx_test, adj_list
 
 
-def load_imdb():
-    data = pkl.load(open("data/imdb/imdb.pkl", "rb"))
+def load_imdb(sc=3):
+    data = pkl.load(open("mGCN_Toolbox/data/imdb/imdb.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["MDM"] + np.eye(data["MDM"].shape[0])*3
-    adj2 = data["MAM"] + np.eye(data["MAM"].shape[0])*3
+    adj1 = data["MDM"] + np.eye(data["MDM"].shape[0])*sc
+    adj2 = data["MAM"] + np.eye(data["MAM"].shape[0])*sc
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -83,13 +83,13 @@ def load_imdb():
     return truefeatures, edge_index, len(edge_index), label, idx_train, idx_val, idx_test, adj_list
 
 
-def load_amazon():
-    data = pkl.load(open("data/amazon/amazon.pkl", "rb"))
+def load_amazon(sc=3):
+    data = pkl.load(open("mGCN_Toolbox/data/amazon/amazon.pkl", "rb"))
     label = data['label']
 
-    adj1 = data["IVI"] + np.eye(data["IVI"].shape[0])*3
-    adj2 = data["IBI"] + np.eye(data["IBI"].shape[0])*3
-    adj3 = data["IOI"] + np.eye(data["IOI"].shape[0])*3
+    adj1 = data["IVI"] + np.eye(data["IVI"].shape[0])*sc
+    adj2 = data["IBI"] + np.eye(data["IBI"].shape[0])*sc
+    adj3 = data["IOI"] + np.eye(data["IOI"].shape[0])*sc
 
     adj1 = sp.csr_matrix(adj1)
     adj2 = sp.csr_matrix(adj2)
@@ -204,7 +204,7 @@ def split_node_data(node_num, train_percent, valid_percent):
         
     return training_id, valid_id, test_id
 
-def split_link_data(data, test_view, neg_k, multi=False):
+def split_link_data(data, test_view, neg_k, multi=False, R=0):
 
     if multi:
         split_edge = []
@@ -217,6 +217,13 @@ def split_link_data(data, test_view, neg_k, multi=False):
             else:
                 temp = get_edges(data.x, data.edge_index[i])
             split_edge.append(temp)
+        if R > 0:
+            candidate_edges = get_masked(data.x, data.edge_index[test_view], R, split_edge[test_view]['test']['edge'].numpy())
+            print("The number of overlapping candidate edges:")
+            print(intersect2D(candidate_edges.numpy(), to_undirected(split_edge[test_view]['test']['edge'].transpose(0,1)).transpose(0,1).numpy()))
+            print(len(candidate_edges))
+            print(len(split_edge[test_view]['test']['edge']))
+            return data, split_edge, candidate_edges
     else:
         split_edge = mask_test_edges(data.x, data.edge_index[test_view], neg_k)
         data.edge_index[test_view] = split_edge['train']['edge'].t()
