@@ -29,42 +29,28 @@ class dataset():
     
     def __init__(self, dataname): #(self, dataname, train_percent, valid_percent):
         self.dataname = dataname
-        self.dataset, self.num_dims,  self.num_classes, self.labels, self.adj_list, self.edge_list = self.load_data(self.dataname)
+        self.features, self.dataset, self.num_dims,  self.num_classes, self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list = self.load_data(self.dataname)
         
-        #self.visualization = self.visualization(self.dataname)
-
-        #self.dataset, self.num_dims, self.training_id, self.valid_id, self.test_id, self.num_classes, self.labels, #self.adj_list, self.edge_list = self.load_data(self.dataname, self.train_percent, self.valid_percent)
         
-    #def split_data(self, node_num, train_percent, valid_percent):
-        
-        #ind = np.arange(0, node_num, 1)
-        #training_sample = int(node_num * self.train_percent)
-        #valid_sample = int(node_num * self.valid_percent)
-        #np.random.shuffle(ind)
-        #training_ind = ind[:training_sample]
-        #valid_id = ind[training_sample:training_sample + valid_sample]
-        #test_id = ind[training_sample + valid_sample:]
-        #training_id = torch.LongTensor(training_ind)
-        #valid_id = torch.LongTensor(valid_id)
-        #test_id = torch.LongTensor(test_id)
-        
-        #return training_id, valid_id, test_id
 
     def load_data(self, dataname):
         if self.dataname == 'amazon':
             data_filename = './data/amazon/amazon.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon(3)
+            truefeatures, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_amazon(3)
         elif self.dataname == 'acm':
             data_filename = './data/acm/acm.mat'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_acm_mat(3)
+            truefeatures, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_acm_mat(3)
         elif self.dataname == 'imdb':
             data_filename = './data/imdb/imdb.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb(3)
+            truefeatures, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_imdb(3)
         elif self.dataname == 'dblp':
             data_filename = './data/dblp/dblp.pkl'
-            embed_matrix, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp(3)
-            
-        embed_matrix = preprocess_features(embed_matrix)
+            truefeatures, edge_list, num_dims, labels, idx_train, idx_val, idx_test, adj_list = load_dblp(3)
+        
+        features = truefeatures
+        truefeatures = preprocess_features(truefeatures)
+        gcn_labels = labels
+        gcn_adj_list = adj_list
         adj_list = [normalize_adj(adj) for adj in adj_list]
         adj_list = [sparse_mx_to_torch_sparse_tensor(adj) for adj in adj_list]
         labels =  np.argmax(labels, axis=1)
@@ -72,11 +58,11 @@ class dataset():
         valid_id = torch.LongTensor(idx_val)
         test_id = torch.LongTensor(idx_test)
 
-        # edge_list = [add_self_loops(torch.LongTensor(temp).transpose(0, 1))[0] for temp in edge_list]
+        
         edge_list = [torch.LongTensor(temp).transpose(0, 1) for temp in edge_list]
 
-        embed_matrix = torch.FloatTensor(embed_matrix)
-        dataset = Data(x=embed_matrix, edge_index=edge_list)
+        truefeatures = torch.FloatTensor(truefeatures)
+        dataset = Data(x=truefeatures, edge_index=edge_list)
         
         num_classes = np.max(labels) + 1
         labels = torch.LongTensor(labels)
@@ -85,7 +71,7 @@ class dataset():
 
         #return dataset, num_dims, training_id, valid_id, test_id, num_classes, labels, adj_list, edge_list
         
-        return dataset, num_dims, num_classes, labels, adj_list, edge_list
+        return features, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list
     
     def visualization(self,dataname):
         if self.dataname == 'amazon':
