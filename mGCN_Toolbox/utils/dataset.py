@@ -40,7 +40,7 @@ class dataset():
         #self.val_mask = None
         #self.test_mask = None
         #if self.dataname == 'amazon'or self.dataname == 'acm'or self.dataname == 'imdb' or self.dataname != 'dblp':
-        self.truefeatures_list, self.features, self.dataset, self.num_dims, self.num_classes, self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list, self.sequence_adj = self.load_data(self.dataname)
+        self.truefeatures_list, self.features, self.dataset, self.num_dims, self.num_classes, self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list, self.sequence_adj,self.train_id,self.valid_id,self.test_id = self.load_data(self.dataname)
         
         #if self.dataname == 'Amazon'or self.dataname == 'Youtube'or self.dataname == 'Twitter'or self.dataname != 'example':
         self.training_data_by_type, self.valid_true_data_by_edge, self.valid_false_data_by_edge, self.testing_true_data_by_edge, self.testing_false_data_by_edge = self.load_txt_data(self.dataname)
@@ -81,7 +81,10 @@ class dataset():
             adj_list = None
             edge_list = None
             sequence_adj = None
-            return truefeatures_list, truefeatures, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list,sequence_adj
+            idx_train = None
+            idx_val = None
+            idx_test = None
+            return truefeatures_list, truefeatures, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list,sequence_adj,idx_train, idx_val, idx_test
         
         features = truefeatures
         truefeatures = preprocess_features(truefeatures)
@@ -107,7 +110,7 @@ class dataset():
 
         #return dataset, num_dims, training_id, valid_id, test_id, num_classes, labels, adj_list, edge_list
         
-        return truefeatures_list, features, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list,sequence_adj
+        return truefeatures_list, features, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list,sequence_adj,training_id,valid_id,test_id
     
     
     def load_txt_data(self,dataname):
@@ -168,6 +171,43 @@ class dataset():
             av=[]
             av.append(A)
             av.append(B)
+            gnd = data['label']
+            gnd = gnd.T
+            gnd = np.argmax(gnd, axis=0)
+        elif dataname == 'AMAZON3025':
+            data = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
+            X = data['feature']
+            A = data["IVI"]
+            B = data["IBI"]
+            C = data["IOI"]
+            av=[]
+            av.append(A)
+            av.append(B)
+            av.append(C)
+            gnd = data['label']
+            gnd = gnd.T
+            gnd = np.argmax(gnd, axis=0)
+        elif dataname == 'IMDB3025':
+            data = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
+            X = data['feature']
+            A = data["MDM"]
+            B = data["MAM"]
+            av=[]
+            av.append(A)
+            av.append(B)
+            gnd = data['label']
+            gnd = gnd.T
+            gnd = np.argmax(gnd, axis=0)
+        elif dataname == 'DBLP3025':
+            ata = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
+            X = data['feature']
+            A = data["PAP"]
+            B = data["PPrefP"]
+            C = data["PATAP"]
+            av=[]
+            av.append(A)
+            av.append(B)
+            av.append(C)
             gnd = data['label']
             gnd = gnd.T
             gnd = np.argmax(gnd, axis=0)
