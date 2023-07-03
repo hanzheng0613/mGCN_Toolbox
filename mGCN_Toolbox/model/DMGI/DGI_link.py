@@ -64,15 +64,15 @@ class DGI(embedder):
             model.load_state_dict(torch.load('saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder)))
             # Evaluation
             embeds, _ = model.embed(features, adj, self.args.sparse)
-            print('ss')
-            print(embeds.shape)
+            #print('ss')
+            #print(embeds.shape)
             #evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
             final_embeds.append(embeds)
 
         embeds = torch.mean(torch.cat(final_embeds), 0).unsqueeze(0)
         #print("- Integrated")
         #evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
-        print(embeds.shape)
+        #print(embeds.shape)
         AUC, hits, ap = evaluate(embeds, self.split_edge)
         return AUC, hits, ap
 

@@ -87,7 +87,8 @@ def evaluate(embeds, split_edges, isTest=True):
 
 
     for epoch in range(3):
-        log = LogReg(embeds.shape[1], 2)
+        #print(embeds.shape)
+        log = LogReg(embeds.shape[-1], 2)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
         log.to(embeds.device)
         np.random.seed(epoch)
@@ -100,13 +101,16 @@ def evaluate(embeds, split_edges, isTest=True):
         best_val = 0
         best_test = 0
         best_hits = [0, 0, 0, 0, 0, 0, 0]
+        t = embeds
+        embeds = np.reshape(t,(3025,64))
+        #print("embeds:",embeds.shape)
         for iter_ in range(1000):
             # train
             log.train()
             opt.zero_grad()
-            print(embeds.shape)
-            print(split_edges['train']['edge'].shape)
-            print(training_negative.shape)
+            #print(embeds)
+            #print(split_edges['train']['edge'].shape)
+            #print(training_negative.shape)
             logits = log(embeds, split_edges['train']['edge'], training_negative)
             loss = xent(logits, split_edges['train']['label'])
 

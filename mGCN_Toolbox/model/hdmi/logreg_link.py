@@ -18,6 +18,9 @@ class LogReg(nn.Module):
 
     def forward(self, seq, edges, edges_neg):
         ret = self.fc(seq)
+        #print("ret:",ret)
+        #print("ret shape:",ret.shape)
+        #print("ret info:",ret[edges[:, 0]])
         results = torch.cat(((ret[edges[:, 0]] * ret[edges[:, 1]]).sum(dim=-1),
                              (ret[edges_neg[:, 0]] * ret[edges_neg[:, 1]]).sum(dim=-1)))
         return results
