@@ -20,18 +20,26 @@ class embedder:
         self.sample_data = dataset(args.dataset)
         args.batch_size = 1
         args.sparse = True
-        args.metapaths_list = args.metapaths.split(",")
+        #args.metapaths_list = args.metapaths.split(",")
         args.gpu_num_ = args.gpu_num
         if args.gpu_num_ == 'cpu':
             args.device = 'cpu'
         else:
             args.device = torch.device("cuda:" + str(args.gpu_num_) if torch.cuda.is_available() else "cpu")
-        truefeatures_list, features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj = self.sample_data.load_data(args.dataset)
-        idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
+        truefeatures_list, features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+        #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
         
         #adj, features, labels, idx_train, idx_val, idx_test = process.load_data_dblp(args)
         
+        c = args.test_view
+        neg_num = 1
+        for i in edge_list:
+            i = i.transpose(1, 0)
+        split_edges = mask_test_edges(features, edge_list[c],neg_num )
+        
         features = [preprocess_features(feature) for feature in truefeatures_list]
+        
+        
 
         args.nb_nodes = features[0].shape[0]
         args.ft_size = features[0].shape[1]
@@ -51,6 +59,14 @@ class embedder:
         self.train_lbls = torch.argmax(self.labels[0, self.idx_train], dim=1)
         self.val_lbls = torch.argmax(self.labels[0, self.idx_val], dim=1)
         self.test_lbls = torch.argmax(self.labels[0, self.idx_test], dim=1)
+        
+        split_edges['train']['label'] = torch.cat(
+            (split_edges['train']['label_pos'], split_edges['train']['label_neg'])).to(args.device)
+        split_edges['valid']['label'] = torch.cat(
+            (split_edges['valid']['label_pos'], split_edges['valid']['label_neg'])).to(args.device)
+        split_edges['test']['label'] = torch.cat(
+            (split_edges['test']['label_pos'], split_edges['test']['label_neg'])).to(args.device)
+        self.split_edge = split_edges
 
         # How to aggregate
         args.readout_func = AvgReadout()

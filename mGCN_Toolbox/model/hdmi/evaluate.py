@@ -97,8 +97,8 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
     test_lbls = np.array(test_lbls.cpu())
 
     k1 = run_kmeans(test_embs, test_lbls, nb_classes)
-    run_similarity_search(test_embs, test_lbls)
-    return macro_f1s, micro_f1s, k1
+    sim = run_similarity_search(test_embs, test_lbls)
+    return macro_f1s, micro_f1s, k1, sim
 
 
 def run_similarity_search(test_embs, test_lbls):

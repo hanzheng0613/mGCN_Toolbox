@@ -21,6 +21,8 @@ class GOAL(Model):
         super().__init__(args)
         self.adj = self.adj_list[self.args.layer].to(self.args.device)
         self.encoder = Encoder(self.args.ft_size, self.args.hid_units).to(self.args.device)
+        self.embeds = self.get_embeddings()
+        
 
     def get_embeddings(self):
         self.encoder.eval()

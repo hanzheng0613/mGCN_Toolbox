@@ -1,9 +1,9 @@
-"""
-   PyTorch implementation of HDMI: High-order Deep Multiplex Infomax  
-   
-       https://github.com/baoyujing/HDMI/tree/master
-        
-"""
+
+
+
+
+
+
 
 
 import os
@@ -11,9 +11,9 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
-
-from mGCN_Toolbox.model.hdmi.evaluate import evaluate
 from mGCN_Toolbox.model.hdmi.embedder import embedder
+#from mGCN_Toolbox.model.hdmi.evaluate import evaluate
+from mGCN_Toolbox.model.hdmi.embedder_link import evaluate
 from mGCN_Toolbox.layers.hdmi.gcn import GCN
 from mGCN_Toolbox.layers.hdmi.discriminator import InterDiscriminator
 
@@ -90,8 +90,8 @@ class HDMI(embedder):
         print("Evaluating...")
         model.eval()
         embeds = model.embed(features, adj_list, self.args.sparse)
-        macro_f1s, micro_f1s, k1, sim = evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels,)
-        return macro_f1s, micro_f1s, k1, sim
+        AUC, hits, ap = evaluate(embeds, self.split_edge)
+        return AUC, hits, ap
 
     def get_loss(self, logits):
         """

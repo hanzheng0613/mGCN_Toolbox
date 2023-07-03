@@ -1,14 +1,3 @@
-'''
-    The PyTorch implementation of Unsupervised Attributed Multiplex Network Embedding (DMGI)
-    
-    https://github.com/pcy1302/DMGI
-'''
-
-
-
-# Code based on https://github.com/PetarV-/DGI/blob/master/models/dgi.py
-
-
 import torch
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
@@ -19,7 +8,7 @@ from mGCN_Toolbox.model.DMGI.embedder import embedder
 from mGCN_Toolbox.layers.DMGI import GCN, Discriminator
 import numpy as np
 np.random.seed(0)
-from mGCN_Toolbox.model.DMGI.evaluate import evaluate
+from mGCN_Toolbox.model.DMGI.embedder_link import evaluate
 
 class DGI(embedder):
     def __init__(self, args):
@@ -29,13 +18,11 @@ class DGI(embedder):
     def training(self):
         features_lst = [feature.to(self.args.device) for feature in self.features]
         adj_lst = [adj_.to(self.args.device) for adj_ in self.adj]
-        #print(adj_lst.shape)
 
         final_embeds = []
         for m_idx, (features, adj) in enumerate(zip(features_lst, adj_lst)):
-            #print(adj.shape)
-            metapath = self.args.metapaths_list[m_idx]
-            print("- Training on {}".format(metapath))
+            #metapath = self.args.metapaths_list[m_idx]
+            #print("- Training on {}".format(metapath))
             model = modeler(self.args).to(self.args.device)
 
             optimiser = torch.optim.Adam(model.parameters(), lr=self.args.lr, weight_decay=self.args.l2_coef)
@@ -62,7 +49,8 @@ class DGI(embedder):
                 if loss < best:
                     best = loss
                     cnt_wait = 0
-                    torch.save(model.state_dict(), 'saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, metapath))
+                    #torch.save(model.state_dict(), 'saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, metapath))
+                    torch.save(model.state_dict(), 'saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder))
                 else:
                     cnt_wait += 1
 
@@ -72,16 +60,21 @@ class DGI(embedder):
                 loss.backward()
                 optimiser.step()
 
-            model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, metapath)))
-
+            #model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, metapath)))
+            model.load_state_dict(torch.load('saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder)))
             # Evaluation
             embeds, _ = model.embed(features, adj, self.args.sparse)
-            evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+            print('ss')
+            print(embeds.shape)
+            #evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
             final_embeds.append(embeds)
 
         embeds = torch.mean(torch.cat(final_embeds), 0).unsqueeze(0)
-        print("- Integrated")
-        evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+        #print("- Integrated")
+        #evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+        print(embeds.shape)
+        AUC, hits, ap = evaluate(embeds, self.split_edge)
+        return AUC, hits, ap
 
 class modeler(nn.Module):
     def __init__(self, args):
@@ -113,3 +106,4 @@ class modeler(nn.Module):
         c = self.args.readout_act_func(c)  # equation 9
 
         return h_1.detach(), c.detach()
+

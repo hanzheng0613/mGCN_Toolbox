@@ -16,7 +16,8 @@ from sklearn.metrics import (auc, f1_score, precision_recall_curve,
 from tqdm import tqdm
 
 from mGCN_Toolbox.model.GATNE.walk import RWGraph
-
+from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
+from sklearn.cluster import KMeans
 
 class Vocab(object):
 
@@ -269,7 +270,7 @@ def get_score(local_model, node1, node2):
         pass
 
 
-def evaluate(model, true_edges, false_edges):
+def evaluate(model, true_edges, false_edges,num_classes):
     true_list = list()
     prediction_list = list()
     true_num = 0
@@ -298,4 +299,8 @@ def evaluate(model, true_edges, false_edges):
     y_true = np.array(true_list)
     y_scores = np.array(prediction_list)
     ps, rs, _ = precision_recall_curve(y_true, y_scores)
-    return roc_auc_score(y_true, y_scores), f1_score(y_true, y_pred), auc(rs, ps)
+    macro = f1_score(y_true, y_pred,average="macro")
+    micro = f1_score(y_true, y_pred,average="micro")
+    
+    return macro, micro
+

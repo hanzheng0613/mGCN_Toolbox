@@ -117,7 +117,7 @@ def run_similarity_search(test_embs, test_lbls):
 
 
 def run_kmeans(x, y, k):
-    estimator = KMeans(n_clusters=k, n_jobs=16)
+    estimator = KMeans(n_clusters=k,n_init=10)#, n_jobs=16)
 
     NMI_list = []
     for i in range(10):

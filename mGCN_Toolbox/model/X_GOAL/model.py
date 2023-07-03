@@ -36,20 +36,18 @@ class Model:
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_dblp()
             
         if args.dataset == "acm":
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj = self.sample_data.load_data(args.dataset)
-            idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
-            
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_acm_mat()
             
         if args.dataset == "imdb":            
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj = self.sample_data.load_data(args.dataset)
-            idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
-            
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_imdb()
             
         if args.dataset == "amazon":
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj = self.sample_data.load_data(args.dataset)
-            idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_amazon()
 
@@ -129,7 +127,7 @@ class Model:
 
     def run_kmeans(self, x, k):
         x_np = x.detach().cpu().data.numpy()
-        kmeans = KMeans(n_clusters=k, n_jobs=16)
+        kmeans = KMeans(n_clusters=k,n_init = 10) #n_jobs=16)
         kmeans.fit(x_np)
         c_cond_x = kmeans.predict(x_np)  # [batch_size,]
         centroids = kmeans.cluster_centers_  # [k, dim]

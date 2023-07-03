@@ -1,9 +1,3 @@
-'''
-    The PyTorch implementation of Unsupervised Attributed Multiplex Network Embedding (DMGI)
-    
-    https://github.com/pcy1302/DMGI
-'''
-
 import torch
 torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
@@ -14,7 +8,7 @@ from mGCN_Toolbox.model.DMGI.embedder import embedder
 from mGCN_Toolbox.layers.DMGI import GCN, Discriminator, Attention
 import numpy as np
 np.random.seed(0)
-from mGCN_Toolbox.model.DMGI.evaluate import evaluate
+from mGCN_Toolbox.model.DMGI.embedder_link import evaluate
 from mGCN_Toolbox.model.DMGI import LogReg
 import pickle as pkl
 
@@ -66,7 +60,8 @@ class DMGI(embedder):
             if loss < best:
                 best = loss
                 cnt_wait = 0
-                torch.save(model.state_dict(), 'saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths))
+                #torch.save(model.state_dict(), 'saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths))
+                torch.save(model.state_dict(), 'saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder))
             else:
                 cnt_wait += 1
 
@@ -77,12 +72,18 @@ class DMGI(embedder):
             optimiser.step()
 
 
-        model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths)))
+        #model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths)))
+        
+        model.load_state_dict(torch.load('saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder)))
 
         # Evaluation
         model.eval()
-        evaluate(model.H.data.detach(), self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
-
+        #evaluate(model.H.data.detach(), self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+        
+        #embeds = model.embed(features, adj, self.args.sparse)
+        #print(model.H.data.detach().shape)
+        AUC, hits, ap = evaluate(model.H.data.detach(), self.split_edge)
+        return AUC, hits, ap
 
 class modeler(nn.Module):
     def __init__(self, args):
@@ -156,6 +157,6 @@ class modeler(nn.Module):
         return result
     
     # Detach the return variables
-    def embed(self, seq, adj, sparse):
-        h_1 = torch.squeeze(self.gcn(seq, adj, sparse))
-        return h_1.detach()
+    #def embed(self, seq, adj, sparse):
+        #h_1 = torch.squeeze(self.gcn(seq, adj, sparse))
+        #return h_1.detach()

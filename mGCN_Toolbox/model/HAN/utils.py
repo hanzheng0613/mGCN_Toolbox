@@ -105,7 +105,7 @@ def setup(args):
     args.update(default_configure)
     set_random_seed(args["seed"])
     # args["dataset"] = "ACMRaw" if args["hetero"] else "ACM"
-    args["dataset"] = "AMAZON"
+    args["dataset"] = "IMDB"
     args["device"] = "cuda:0" if torch.cuda.is_available() else "cpu"
     args["log_dir"] = setup_log_dir(args)
     return args
@@ -259,7 +259,7 @@ def load_amazon(remove_self_loop):
     print("dataset loaded")
     pprint(
         {
-            "dataset": "AMAZON",
+            "dataset": "IMDB",
             "train": train_mask.sum().item() / num_nodes,
             "val": val_mask.sum().item() / num_nodes,
             "test": test_mask.sum().item() / num_nodes,

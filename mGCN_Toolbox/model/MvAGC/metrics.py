@@ -7,6 +7,9 @@
 from sklearn.metrics import f1_score
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import average_precision_score
+from sklearn.metrics import normalized_mutual_info_score
+from sklearn.metrics import pairwise
+
 from sklearn import metrics
 from munkres import Munkres, print_matrix
 import numpy as np
@@ -51,6 +54,17 @@ class clustering_metrics():
     def __init__(self, true_label, predict_label):
         self.true_label = true_label
         self.pred_label = predict_label
+        
+    def run_similarity_search(self):
+        c = 0
+        
+        for i in range(len(self.true_label)):
+            if self.pred_label[i] == self.true_label[i]:
+                c += 1
+        
+        sim = c/len(self.true_label)
+        return sim
+                
 
     def clusteringAcc(self):
         # best mapping between true_label and predict label
@@ -100,23 +114,28 @@ class clustering_metrics():
             self.true_label, new_predict, average='micro')
         recall_micro = metrics.recall_score(
             self.true_label, new_predict, average='micro')
-        return acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro
+        sim = self.run_similarity_search()
+        return acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, sim
+    
+    
 
     def evaluationClusterModelFromLabel(self,m,a,k):
         nmi = metrics.normalized_mutual_info_score(
             self.true_label, self.pred_label)
         adjscore = metrics.adjusted_rand_score(
             self.true_label, self.pred_label)
-        acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro = self.clusteringAcc()
+        acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, sim = self.clusteringAcc()
 
-        print('ACC=%f, f1_macro=%f, precision_macro=%f, recall_macro=%f, f1_micro=%f, precision_micro=%f, recall_micro=%f, NMI=%f, ADJ_RAND_SCORE=%f' % (acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, nmi, adjscore))
+        print('ACC=%f, f1_macro=%f, precision_macro=%f, recall_macro=%f, f1_micro=%f, precision_micro=%f, recall_micro=%f, NMI=%f, ADJ_RAND_SCORE=%f, SIM=%f' % (acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, nmi, adjscore, sim))
 
         fh = open('recoderimdkA3.txt', 'a')
 
-        fh.write('m=%f,a=%f,k=%f,ACC=%f, f1_macro=%f, precision_macro=%f, recall_macro=%f, f1_micro=%f, precision_micro=%f, recall_micro=%f, NMI=%f, ADJ_RAND_SCORE=%f' % (m,a,k,
-            acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, nmi, adjscore))
+        fh.write('m=%f,a=%f,k=%f,ACC=%f, f1_macro=%f, precision_macro=%f, recall_macro=%f, f1_micro=%f, precision_micro=%f, recall_micro=%f, NMI=%f, ADJ_RAND_SCORE=%f, SIM=%f' % (m,a,k,
+            acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro, nmi, adjscore,sim))
         fh.write('\r\n')
         fh.flush()
         fh.close()
 
-        return acc, nmi, f1_macro,adjscore
+        return acc, nmi, f1_macro,adjscore,sim
+    
+    
