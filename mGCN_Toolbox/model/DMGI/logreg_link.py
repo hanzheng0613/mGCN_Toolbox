@@ -18,7 +18,7 @@ class LogReg(nn.Module):
 
     def forward(self, seq, edges, edges_neg):
         ret = self.fc(seq)
-        #print(ret.shape)
+        #print("ret",ret.shape)
         t = ((ret[edges[:, 0]] * ret[edges[:, 1]]).sum(dim=-1),
                              (ret[edges_neg[:, 0]] * ret[edges_neg[:, 1]]).sum(dim=-1))
         #print(t.shape)

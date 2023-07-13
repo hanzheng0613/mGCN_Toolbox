@@ -62,9 +62,9 @@ def evaluate_metrics(true, pred, test, positive_num):
         return AUC_value, hits, ap
     return AUC_value
 
-def evaluate_model(model_GNN, embeds, edge, edge_neg, common_neighbors, labels, test=False, num_pos=None):
-    model_GNN.eval()
-    logits = model_GNN(embeds, edge, edge_neg)
+def evaluate_model(model, embeds, edge, edge_neg, common_neighbors, labels, test=False, num_pos=None):
+    model.eval()
+    logits = model(embeds, edge, edge_neg)
     return evaluate_metrics(labels.cpu().numpy(), torch.sigmoid(logits).cpu().detach().numpy(), test, edge.shape[0])
 
 
@@ -87,7 +87,7 @@ def evaluate(embeds, split_edges, isTest=True):
 
 
     for epoch in range(3):
-        #print(embeds.shape)
+        #print("initial ",embeds.shape)
         log = LogReg(embeds.shape[-1], 2)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
         log.to(embeds.device)
@@ -103,7 +103,7 @@ def evaluate(embeds, split_edges, isTest=True):
         best_hits = [0, 0, 0, 0, 0, 0, 0]
         t = embeds
         embeds = np.reshape(t,(3025,64))
-        #print("embeds:",embeds.shape)
+        #print("reshape embeds:",embeds.shape)
         for iter_ in range(1000):
             # train
             log.train()
