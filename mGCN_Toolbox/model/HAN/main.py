@@ -20,6 +20,7 @@ def evaluate(model, g, features, labels, mask, loss_func):
     model.eval()
     with torch.no_grad():
         logits = model(g, features)
+    
     loss = loss_func(logits[mask], labels[mask])
     accuracy, micro_f1, macro_f1 = score(logits[mask], labels[mask])
 

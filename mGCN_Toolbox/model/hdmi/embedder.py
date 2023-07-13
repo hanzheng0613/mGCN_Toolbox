@@ -42,7 +42,8 @@ class embedder:
         neg_num = 1
         for i in edge_list:
             i = i.transpose(1, 0)
-        split_edges = mask_test_edges(features, edge_list[c],neg_num )
+            
+        split_edges = mask_test_edges(features, edge_list[c],neg_num)
         preprocessed_features = preprocess_features(features)
 
         args.nb_nodes = adj_list[0].shape[0]

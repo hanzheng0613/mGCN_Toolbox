@@ -15,6 +15,8 @@ from mGCN_Toolbox.utils.dataset import dataset
 from mGCN_Toolbox.utils.process import *
 from mGCN_Toolbox.layers.X_GOAL import TransformationPOS, TransformationNEG
 
+from mGCN_Toolbox.model.X_GOAL.utils import preprocess_features_dblp
+
 
 class Model:
     def __init__(self, args):
@@ -30,8 +32,8 @@ class Model:
             args.device = torch.device("cuda:" + str(args.gpu_num_) if torch.cuda.is_available() else "cpu")
 
         if args.dataset == "dblp":
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj = self.sample_data.load_data(args.dataset)
-            idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_dblp()
             
@@ -50,7 +52,19 @@ class Model:
             #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_amazon()
-
+        c = args.test_view
+        neg_num = 1
+        split_edges = mask_test_edges(features, edge_list[c],neg_num)
+        
+        split_edges['train']['label'] = torch.cat(
+            (split_edges['train']['label_pos'], split_edges['train']['label_neg'])).to(args.device)
+        split_edges['valid']['label'] = torch.cat(
+            (split_edges['valid']['label_pos'], split_edges['valid']['label_neg'])).to(args.device)
+        split_edges['test']['label'] = torch.cat(
+            (split_edges['test']['label_pos'], split_edges['test']['label_neg'])).to(args.device)
+        self.split_edge = split_edges
+        
+        
         if args.dataset == "dblp":
             features = preprocess_features_dblp(features)
         else:
