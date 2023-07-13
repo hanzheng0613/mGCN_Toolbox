@@ -29,30 +29,10 @@ class dataset():
     
     def __init__(self, dataname): #(self, dataname, train_percent, valid_percent):
         self.dataname = dataname
-        #self.gs = None
-        #self.HAN_features = None
-        #self.HAN_labels = None
-        #self.HAN_num_classes = None
-        #self.HAN_train_idx = None
-        #self.HAN_val_idx = None
-        #self.HAN_test_idx = None
-        #self.train_mask = None
-        #self.val_mask = None
-        #self.test_mask = None
-        #if self.dataname == 'amazon'or self.dataname == 'acm'or self.dataname == 'imdb' or self.dataname != 'dblp':
+        
         self.truefeatures_list, self.features, self.dataset, self.num_dims, self.num_classes, self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list, self.sequence_adj,self.train_id,self.valid_id,self.test_id = self.load_data(self.dataname)
         
-        #if self.dataname == 'Amazon'or self.dataname == 'Youtube'or self.dataname == 'Twitter'or self.dataname != 'example':
-        self.training_data_by_type, self.valid_true_data_by_edge, self.valid_false_data_by_edge, self.testing_true_data_by_edge, self.testing_false_data_by_edge = self.load_txt_data(self.dataname)
-        
-        self.gs,self.HAN_features,self.HAN_labels,self.HAN_num_classes,self.HAN_train_idx,self.HAN_val_idx,self.HAN_test_idx,self.train_mask,self.val_mask,self.test_mask = self.load_HAN_data(self.dataname)
-        
-        
-        self.X, self.av, self.gnd = self.load_MvAGC_data(self.dataname)
-            
-                                           #self.gs,self.HAN_features,self.HAN_labels,self.HAN_num_classes,self.HAN_train_idx,self.HAN_val_idx,
-                #self.HAN_test_idx,self.train_mask,self.val_mask,self.test_mask = self.load_HAN_data(self.dataname)
-        
+       
         
 
     def load_data(self, dataname):
@@ -113,112 +93,9 @@ class dataset():
         return truefeatures_list, features, dataset, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list,sequence_adj,training_id,valid_id,test_id
     
     
-    def load_txt_data(self,dataname):
-        if self.dataname == 'Amazon'or self.dataname == 'Youtube'or self.dataname == 'Twitter'or self.dataname == 'example':
-            training_data_by_type = load_txt_training_data("mGCN_Toolbox/data/GATNE/"+self.dataname + "/train.txt")
-            valid_true_data_by_edge, valid_false_data_by_edge = load_txt_testing_data("mGCN_Toolbox/data/GATNE/"+self.dataname + "/valid.txt")
-            testing_true_data_by_edge, testing_false_data_by_edge = load_txt_testing_data(
-            "mGCN_Toolbox/data/GATNE/"+ self.dataname + "/test.txt")
-            
-        else: 
-            training_data_by_type = None
-            valid_true_data_by_edge = None
-            valid_false_data_by_edge = None
-            testing_true_data_by_edge = None
-            testing_false_data_by_edge = None
-            
-        return training_data_by_type, valid_true_data_by_edge, valid_false_data_by_edge, testing_true_data_by_edge, testing_false_data_by_edge
     
-    def load_HAN_data(self, dataname):
-        if self.dataname == 'AMAZON':
-            gs,HAN_features,HAN_labels,HAN_num_classes,HAN_train_idx,HAN_val_idx,HAN_test_idx,train_mask,val_mask,test_mask = load_AMAZON(False)
-
-        elif self.dataname == 'ACM':
-            gs,HAN_features,HAN_labels,HAN_num_classes,HAN_train_idx,HAN_val_idx,HAN_test_idx,train_mask,val_mask,test_mask = load_ACM(False)
-
-        elif self.dataname == 'IMDB':
-            gs,HAN_features,HAN_labels,HAN_num_classes,HAN_train_idx,HAN_val_idx,HAN_test_idx,train_mask,val_mask,test_mask = load_IMDB(False)
-
-        elif self.dataname == 'ACM_RAW':
-            gs,HAN_features,HAN_labels,HAN_num_classes,HAN_train_idx,HAN_val_idx,HAN_test_idx,train_mask,val_mask,test_mask = load_ACM_raw(False)
-            
-        
-        else:
-            gs = None
-            HAN_features = None
-            HAN_labels = None
-            HAN_num_classes = None
-            HAN_train_idx = None
-            HAN_val_idx = None
-            HAN_test_idx = None
-            train_mask = None
-            val_mask = None
-            test_mask = None
-        return gs,HAN_features,HAN_labels,HAN_num_classes,HAN_train_idx,HAN_val_idx,HAN_test_idx,train_mask,val_mask,test_mask
     
-    def load_MvAGC_data(self,dataname):
-        
-        #if(dataname == 'large_cora'):
-            #X = data['X']
-            #A = data['G']
-            #gnd = data['labels']
-            #gnd = gnd[0, :]
-        if dataname == 'ACM3025':
-            data = sio.loadmat('mGCN_Toolbox/data/MvAGC/{}.mat'.format(dataname))
-            X = data['feature']
-            A = data['PAP']
-            B = data['PLP']
-            av=[]
-            av.append(A)
-            av.append(B)
-            gnd = data['label']
-            gnd = gnd.T
-            gnd = np.argmax(gnd, axis=0)
-        elif dataname == 'AMAZON3025':
-            data = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
-            X = data['feature']
-            A = data["IVI"]
-            B = data["IBI"]
-            C = data["IOI"]
-            av=[]
-            av.append(A)
-            av.append(B)
-            av.append(C)
-            gnd = data['label']
-            gnd = gnd.T
-            gnd = np.argmax(gnd, axis=0)
-        elif dataname == 'IMDB3025':
-            data = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
-            X = data['feature']
-            A = data["MDM"]
-            B = data["MAM"]
-            av=[]
-            av.append(A)
-            av.append(B)
-            gnd = data['label']
-            gnd = gnd.T
-            gnd = np.argmax(gnd, axis=0)
-        elif dataname == 'DBLP3025':
-            ata = pkl.load(open("mGCN_Toolbox/data/MvAGC/" + dataname+".pkl", "rb"))
-            X = data['feature']
-            A = data["PAP"]
-            B = data["PPrefP"]
-            C = data["PATAP"]
-            av=[]
-            av.append(A)
-            av.append(B)
-            av.append(C)
-            gnd = data['label']
-            gnd = gnd.T
-            gnd = np.argmax(gnd, axis=0)
-        else:
-            X= None
-            av = None
-            gnd = None
-
-        return X, av, gnd
-
-
+   
     
     def visualization(self,dataname):
         if self.dataname == 'amazon':
