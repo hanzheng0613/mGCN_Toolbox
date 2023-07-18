@@ -58,8 +58,9 @@ def load_acm_mat(sc=3):
 
 def load_dblp(sc=3):
     data = pkl.load(open("mGCN_Toolbox/data/dblp/dblp.pkl", "rb"))
+    #print(data.shape)
     label = data['label']
-
+    
     adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*sc
     adj2 = data["PPrefP"] + np.eye(data["PPrefP"].shape[0])*sc
     adj3 = data["PATAP"] + np.eye(data["PATAP"].shape[0])*sc
@@ -289,7 +290,7 @@ default_configure = {
     "hidden_units": 8,
     "dropout": 0.6,
     "weight_decay": 0.001,
-    "num_epochs": 10,
+    "num_epochs": 100,
     "patience": 100,
 }
 
@@ -836,6 +837,9 @@ def get_masked(context, edge_index, R, test_edges):
 
 def get_edges(feature, edge_index):
     edges = edge_index.transpose(0, 1).numpy()
+    print(edges.shape)
+    print((edges[:, 0].max(), edges[:, 1]))
+    print(feature.shape[0])
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
                         shape=(feature.shape[0], feature.shape[0]),
                         dtype=np.float32)
@@ -880,7 +884,7 @@ def split_link_data(data, test_view, neg_k, multi=False, R=0):
         split_edge = []
         views = len(data.edge_index)
         for i in range(0, views):
-            print("Views:", to_undirected(data.edge_index[i]).shape)
+            #print("Views:", to_undirected(data.edge_index[i]).shape)
             if i == test_view:
                 temp = mask_test_edges(data.x, data.edge_index[i], neg_k)
                 data.edge_index[i] = temp['train']['edge'].t()
@@ -908,6 +912,7 @@ def mask_test_edges(feature, edge_index, neg_num, val_prop=0.1, test_prop=0.5):
     # torch.manual_seed(234)
 
     edges = edge_index.transpose(0, 1).numpy()
+    
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
                         shape=(feature.shape[0], feature.shape[0]),
                         dtype=np.float32)
