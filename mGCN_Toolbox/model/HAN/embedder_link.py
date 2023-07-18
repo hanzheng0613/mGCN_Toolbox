@@ -17,7 +17,7 @@ def area_under_prc(pred, target):
     """
     order = pred.argsort(descending=True)
     target = target[order]
-    print(type(target))
+    #print(type(target))
     precision = target.cumsum(0) / torch.arange(1, len(target) + 1, device=target.device)
     auprc = precision[target == 1].sum() / ((target == 1).sum() + 1e-10)
     return auprc
@@ -129,17 +129,17 @@ def evaluate(embeds, split_edges, isTest=True):
             if eval > best_val:
                 best_val = eval
 
-                best_test, best_hits, best_ap = evaluate_model(log, embeds, split_edges['test']['edge'], split_edges['test']['edge_neg'],
+                AUC, best_hits, ap = evaluate_model(log, embeds, split_edges['test']['edge'], split_edges['test']['edge_neg'],
                                                       None,
                                                       split_edges['test']['label'], test=True)
                 print('Epoch:', epoch)
-                print("Best Validation:", best_val)
-                print("Best Test:", best_test)
+                print("AUC:", AUC)
+                print("AP:", ap)
 
-        print(best_hits)
-        print("Best ap:", best_ap)
-        auc_list.append(best_test)
-        ap_list.append(best_ap)
+        #print(best_hits)
+        #print("Best ap:", ap)
+        auc_list.append(AUC)
+        ap_list.append(ap)
         hits_list.append(best_hits)
 
     return auc_list, ap_list, hits_list

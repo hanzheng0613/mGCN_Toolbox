@@ -18,7 +18,7 @@ def area_under_prc(pred, target):
     """
     order = pred.argsort(descending=True)
     target = target[order]
-    print(type(target))
+    #print(type(target))
     precision = target.cumsum(0) / torch.arange(1, len(target) + 1, device=target.device)
     auprc = precision[target == 1].sum() / ((target == 1).sum() + 1e-10)
     return auprc
@@ -102,8 +102,10 @@ def evaluate(embeds, split_edges, isTest=True):
         best_test = 0
         best_hits = [0, 0, 0, 0, 0, 0, 0]
         t = embeds
-        embeds = np.reshape(t,(3025,64))
-        #print("reshape embeds:",embeds.shape)
+        print("reshape embeds:",embeds.shape)
+        if epoch == 0:
+            embeds = np.reshape(t,(embeds.shape[1],embeds.shape[-1]))
+        
         for iter_ in range(1000):
             # train
             log.train()

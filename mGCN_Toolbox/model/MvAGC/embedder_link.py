@@ -104,7 +104,10 @@ def evaluate(embeds, split_edges, num_classes,isTest=True):
         best_test = 0
         best_hits = [0, 0, 0, 0, 0, 0, 0]
         t = embeds
-        embeds = np.reshape(t,(embeds.shape[-1],embeds.shape[0]))
+        
+        if epoch == 0:
+            embeds = np.reshape(t,(embeds.shape[-1],embeds.shape[0]))
+        #print(embeds.shape)
         #print("embeds:",embeds.shape)
         for iter_ in range(1000):
             # train
