@@ -17,9 +17,9 @@ import scipy.sparse as sp
 import holoviews as hv
 
 
-from mGCN_Toolbox.utils.process import*
+from OpenAttMultiGL.utils.process import*
 
-from mGCN_Toolbox.visualization.multilayer_graph import LayeredNetworkGraph
+from OpenAttMultiGL.visualization.multilayer_graph import LayeredNetworkGraph
 
 from torch_geometric.utils import from_scipy_sparse_matrix
 from torch_geometric.data import Data

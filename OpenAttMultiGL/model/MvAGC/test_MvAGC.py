@@ -9,15 +9,15 @@ import numpy as np
 import scipy
 import scipy.sparse as sp
 from sklearn.cluster import KMeans
-from mGCN_Toolbox.model.MvAGC.metrics import clustering_metrics
+from OpenAttMultiGL.model.MvAGC.metrics import clustering_metrics
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.preprocessing import normalize
 from time import *
 import warnings
 warnings.filterwarnings("ignore")
 # warnings.simplefilter('error',ComplexWarning)
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import * 
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import * 
 
 
 

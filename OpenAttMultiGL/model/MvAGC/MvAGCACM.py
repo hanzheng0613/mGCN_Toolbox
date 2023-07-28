@@ -15,7 +15,7 @@ import numpy as np
 import scipy
 import scipy.sparse as sp
 from sklearn.cluster import KMeans
-from mGCN_Toolbox.model.MvAGC.metrics import clustering_metrics
+from OpenAttMultiGL.model.MvAGC.metrics import clustering_metrics
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.preprocessing import normalize
 from time import *

@@ -1,12 +1,12 @@
 # Test file for toolbox
 
 import argparse
-from mGCN_Toolbox.model.mGCN.mGCN_node import*
+from OpenAttMultiGL.model.mGCN.mGCN_node import*
 import torch.nn as nn
 import torch.optim as optim
 import torch
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import split_node_data
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import split_node_data
 from sklearn.metrics import roc_auc_score
 import numpy as np
 import random

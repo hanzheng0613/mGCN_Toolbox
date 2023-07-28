@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from .model import Model
 from .encoder import Encoder
 
-from mGCN_Toolbox.model.X_GOAL.evaluate import evaluate
+from OpenAttMultiGL.model.X_GOAL.evaluate import evaluate
 
 
 class XGOAL(Model):

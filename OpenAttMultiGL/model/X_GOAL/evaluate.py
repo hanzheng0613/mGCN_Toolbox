@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
 
-from mGCN_Toolbox.model.X_GOAL import LogReg
+from OpenAttMultiGL.model.X_GOAL import LogReg
 
 
 def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):

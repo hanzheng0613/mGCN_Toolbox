@@ -5,7 +5,7 @@
 '''
 import torch
 import torch.nn as nn
-from mGCN_Toolbox.layers.X_GOAL.gcn import GCN
+from OpenAttMultiGL.layers.X_GOAL.gcn import GCN
 
 
 class Encoder(nn.Module):

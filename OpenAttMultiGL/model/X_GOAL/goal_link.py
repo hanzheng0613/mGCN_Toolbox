@@ -13,7 +13,7 @@ import torch
 from .model import Model
 from .encoder import Encoder
 
-from mGCN_Toolbox.model.X_GOAL.embedder_link import evaluate
+from OpenAttMultiGL.model.X_GOAL.embedder_link import evaluate
 
 
 class GOAL(Model):

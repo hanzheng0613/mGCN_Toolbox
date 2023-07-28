@@ -11,11 +11,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.cluster import KMeans
 
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import *
-from mGCN_Toolbox.layers.X_GOAL import TransformationPOS, TransformationNEG
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import *
+from OpenAttMultiGL.layers.X_GOAL import TransformationPOS, TransformationNEG
 
-from mGCN_Toolbox.model.X_GOAL.utils import preprocess_features_dblp
+from OpenAttMultiGL.model.X_GOAL.utils import preprocess_features_dblp
 
 
 class Model:
