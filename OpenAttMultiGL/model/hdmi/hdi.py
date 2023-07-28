@@ -11,9 +11,9 @@ import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 
-from mGCN_Toolbox.model.hdmi.embedder import embedder
-from mGCN_Toolbox.model.hdmi.embedder_link import evaluate
-from mGCN_Toolbox.layers.hdmi import GCN, InterDiscriminator
+from OpenAttMultiGL.model.hdmi.embedder import embedder
+from OpenAttMultiGL.model.hdmi.embedder_link import evaluate
+from OpenAttMultiGL.layers.hdmi import GCN, InterDiscriminator
 
 
 class HDI(embedder):

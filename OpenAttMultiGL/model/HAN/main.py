@@ -2,7 +2,7 @@ import torch
 from sklearn.metrics import f1_score
 from utils import EarlyStopping, load_data
 import numpy as np
-from mGCN_Toolbox.utils.dataset import dataset
+from OpenAttMultiGL.utils.dataset import dataset
 
 def score(logits, labels):
     _, indices = torch.max(logits, dim=1)

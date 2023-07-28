@@ -15,7 +15,7 @@ from sklearn.metrics import (auc, f1_score, precision_recall_curve,
                              roc_auc_score)
 from tqdm import tqdm
 
-from mGCN_Toolbox.model.GATNE.walk import RWGraph
+from OpenAttMultiGL.model.GATNE.walk import RWGraph
 from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
 from sklearn.cluster import KMeans
 

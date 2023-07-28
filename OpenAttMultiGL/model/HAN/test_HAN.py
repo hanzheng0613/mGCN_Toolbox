@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import f1_score
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import * 
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import * 
 import datetime
 import errno
 import os

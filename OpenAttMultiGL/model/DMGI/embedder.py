@@ -10,9 +10,9 @@ import torch
 
 import torch.nn as nn
 
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import *
-from mGCN_Toolbox.layers.DMGI import AvgReadout
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import *
+from OpenAttMultiGL.layers.DMGI import AvgReadout
 
 
 class embedder:

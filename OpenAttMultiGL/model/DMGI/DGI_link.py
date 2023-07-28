@@ -4,11 +4,11 @@ torch.cuda.manual_seed_all(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 import torch.nn as nn
-from mGCN_Toolbox.model.DMGI.embedder import embedder
-from mGCN_Toolbox.layers.DMGI import GCN, Discriminator
+from OpenAttMultiGL.model.DMGI.embedder import embedder
+from OpenAttMultiGL.layers.DMGI import GCN, Discriminator
 import numpy as np
 np.random.seed(0)
-from mGCN_Toolbox.model.DMGI.embedder_link import evaluate
+from OpenAttMultiGL.model.DMGI.embedder_link import evaluate
 
 class DGI(embedder):
     def __init__(self, args):

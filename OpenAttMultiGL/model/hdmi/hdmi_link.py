@@ -11,11 +11,11 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
-from mGCN_Toolbox.model.hdmi.embedder import embedder
+from OpenAttMultiGL.model.hdmi.embedder import embedder
 #from mGCN_Toolbox.model.hdmi.evaluate import evaluate
-from mGCN_Toolbox.model.hdmi.embedder_link import evaluate
-from mGCN_Toolbox.layers.hdmi.gcn import GCN
-from mGCN_Toolbox.layers.hdmi.discriminator import InterDiscriminator
+from OpenAttMultiGL.model.hdmi.embedder_link import evaluate
+from OpenAttMultiGL.layers.hdmi.gcn import GCN
+from OpenAttMultiGL.layers.hdmi.discriminator import InterDiscriminator
 
 
 class HDMI(embedder):

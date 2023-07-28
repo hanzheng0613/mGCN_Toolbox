@@ -6,8 +6,8 @@
 """
 
 import torch
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import *
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import *
 
 class embedder:
     def __init__(self, args):

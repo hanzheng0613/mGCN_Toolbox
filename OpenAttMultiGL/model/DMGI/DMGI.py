@@ -10,12 +10,12 @@ torch.cuda.manual_seed_all(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 import torch.nn as nn
-from mGCN_Toolbox.model.DMGI.embedder import embedder
-from mGCN_Toolbox.layers.DMGI import GCN, Discriminator, Attention
+from OpenAttMultiGL.model.DMGI.embedder import embedder
+from OpenAttMultiGL.layers.DMGI import GCN, Discriminator, Attention
 import numpy as np
 np.random.seed(0)
-from mGCN_Toolbox.model.DMGI.evaluate import evaluate
-from mGCN_Toolbox.model.DMGI import LogReg
+from OpenAttMultiGL.model.DMGI.evaluate import evaluate
+from OpenAttMultiGL.model.DMGI import LogReg
 import pickle as pkl
 
 class DMGI(embedder):

@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
 from sklearn.metrics import roc_auc_score
-from mGCN_Toolbox.model.DMGI.logreg_link import LogReg
+from OpenAttMultiGL.model.DMGI.logreg_link import LogReg
 import random
 
 def area_under_prc(pred, target):

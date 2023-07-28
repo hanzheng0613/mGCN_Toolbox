@@ -9,7 +9,7 @@ torch.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-from mGCN_Toolbox.model.DMGI import LogReg
+from OpenAttMultiGL.model.DMGI import LogReg
 import torch.nn as nn
 import numpy as np
 np.random.seed(0)

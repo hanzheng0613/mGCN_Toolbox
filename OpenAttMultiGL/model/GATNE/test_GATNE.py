@@ -7,9 +7,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from numpy import random
 from torch.nn.parameter import Parameter
-from mGCN_Toolbox.utils.dataset import dataset
-from mGCN_Toolbox.utils.process import * 
-from mGCN_Toolbox.model.GATNE.utils import *
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import * 
+from OpenAttMultiGL.model.GATNE.utils import *
 #from mGCN_Toolbox.model.GATNE.walk import *
 def parse_args():
     parser = argparse.ArgumentParser()

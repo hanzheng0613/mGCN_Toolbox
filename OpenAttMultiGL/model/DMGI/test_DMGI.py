@@ -7,7 +7,7 @@ torch.cuda.manual_seed_all(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 import argparse
-from mGCN_Toolbox.utils.process import *
+from OpenAttMultiGL.utils.process import *
 import scipy.io as sio
 
 def parse_args():
