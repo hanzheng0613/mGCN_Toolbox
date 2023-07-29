@@ -58,7 +58,7 @@ def load_acm_mat(sc=3):
 
 def load_dblp(sc=3):
     data = pkl.load(open("OpenAttMultiGL/data/dblp/dblp.pkl", "rb"))
-    #print(data.shape)
+    
     label = data['label']
     
     adj1 = data["PAP"] + np.eye(data["PAP"].shape[0])*sc

@@ -31,7 +31,8 @@ class embedder:
         
         #adj, features, labels, idx_train, idx_val, idx_test = process.load_data_dblp(args)
         
-        c = args.test_view
+        args_test_view = 0
+        c = args_test_view
         neg_num = 1
         for i in edge_list:
             i = i.transpose(1, 0)
