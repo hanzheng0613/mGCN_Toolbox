@@ -52,7 +52,8 @@ class Model:
             #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_amazon()
-        c = args.test_view
+        args_test_view = 0
+        c = args_test_view
         neg_num = 1
         split_edges = mask_test_edges(features, edge_list[c],neg_num)
         
