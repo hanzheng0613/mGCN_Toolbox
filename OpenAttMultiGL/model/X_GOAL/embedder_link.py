@@ -17,7 +17,7 @@ def area_under_prc(pred, target):
     """
     order = pred.argsort(descending=True)
     target = target[order]
-    print(type(target))
+    #print(type(target))
     precision = target.cumsum(0) / torch.arange(1, len(target) + 1, device=target.device)
     auprc = precision[target == 1].sum() / ((target == 1).sum() + 1e-10)
     return auprc
@@ -84,8 +84,15 @@ def evaluate(embeds, split_edges, isTest=True):
     macro_f1s = []
     macro_f1s_val = []
 
-
-    for epoch in range(3):
+    auc_list = []
+    ap_list = []
+    hits_list = []
+    best_val = 0
+    best_test = 0
+    best_auc = 0
+    best_ap = 0
+    best_hits = [0, 0, 0, 0, 0, 0, 0]
+    for epoch in range(1000):
         #print(embeds.shape)
         log = LogReg(embeds.shape[-1], 2)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
@@ -94,17 +101,12 @@ def evaluate(embeds, split_edges, isTest=True):
         torch.manual_seed(epoch)
         torch.cuda.manual_seed(epoch)
         random.seed(epoch)
-        auc_list = []
-        ap_list = []
-        hits_list = []
-        best_val = 0
-        best_test = 0
-        best_hits = [0, 0, 0, 0, 0, 0, 0]
+        
         t = embeds
         #print("shape:", embeds.shape)
         #embeds = np.reshape(t,(3025,64))
         #print("embeds:",embeds.shape)
-        for iter_ in range(1000):
+        for iter_ in range(100):
             # train
             log.train()
             opt.zero_grad()
@@ -120,28 +122,27 @@ def evaluate(embeds, split_edges, isTest=True):
             # val
             #print(type(split_edges['valid']['label']))
             #print(split_edges['valid']['label'].shape)
-            eval = evaluate_model(log, embeds, split_edges['valid']['edge'], split_edges['valid']['edge_neg'], None,
-                                  split_edges['valid']['label'])
+        auc, hits, ap = evaluate_model(log, embeds, split_edges['valid']['edge'], split_edges['valid']['edge_neg'], None,
+                              split_edges['valid']['label'],test= True)
             # if epoch == epochs - 1:
             #     temp = evaluate_model(split_edges['test']['edge'], split_edges['test']['edge_neg'], None,
             #                           split_edges['test']['label'], test=True)
             #     print("AUC last:", temp)
 
-            if eval > best_val:
-                best_val = eval
+        if auc > best_auc and ap >best_ap:
+            best_auc = auc
+            best_ap = ap
 
-                best_test, best_hits, best_ap = evaluate_model(log, embeds, split_edges['test']['edge'], split_edges['test']['edge_neg'],
-                                                      None,
-                                                      split_edges['test']['label'], test=True)
-                print('Epoch:', epoch)
-                print("Best Validation:", best_val)
-                print("Best Test:", best_test)
-
-        print(best_hits)
-        print("Best ap:", best_ap)
-        auc_list.append(best_test)
-        ap_list.append(best_ap)
-        hits_list.append(best_hits)
+            best_ap = float(best_ap)
+            print('Epoch:', epoch)
+            print("Best auc:", best_auc)
+                #print("Best Test:", best_test)
+            print("Best ap:", best_ap)
+        #print(best_hits)
+        
+        auc_list.append(auc)
+        ap_list.append(ap)
+        hits_list.append(hits)
 
     return auc_list, ap_list, hits_list
 

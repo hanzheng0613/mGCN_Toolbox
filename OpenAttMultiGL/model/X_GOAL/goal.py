@@ -14,6 +14,74 @@ from .model import Model
 from .encoder import Encoder
 
 from OpenAttMultiGL.model.X_GOAL.evaluate import evaluate
+from sklearn import metrics
+
+import numpy as np
+import argparse
+from OpenAttMultiGL.model.mGCN.mGCN_node import*
+from OpenAttMultiGL.utils.process import * 
+from OpenAttMultiGL.layers.hdmi.gcn import GCN
+import torch.nn as nn
+import torch.optim as optim
+import torch
+from OpenAttMultiGL.utils.dataset import dataset
+from OpenAttMultiGL.utils.process import split_node_data
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import normalized_mutual_info_score
+from sklearn.metrics import pairwise
+
+def combine_att(h_list):
+    att_act1 = nn.Tanh()
+    att_act2 = nn.Softmax(dim=-1)
+    h_combine_list = []
+    for i, h in enumerate(h_list):
+        h = w_list[i](h)
+        h = y_list[i](h)
+        h_combine_list.append(h)
+    score = torch.cat(h_combine_list, -1)
+    score = att_act1(score)
+    score = att_act2(score)
+    score = torch.unsqueeze(score, -1)
+    h = torch.stack(h_list, dim=1)
+    h = score * h
+    h = torch.sum(h, dim=1)
+    return h
+
+def embed(seq, adj_list, sparse,n_networks,ft_size):
+    global w_list
+    global y_list
+
+    hid_units = 128
+    gcn_list = nn.ModuleList([GCN(ft_size, hid_units) for _ in range(n_networks)])
+    w_list = nn.ModuleList([nn.Linear(hid_units, hid_units, bias=False) for _ in range(n_networks)])
+    y_list = nn.ModuleList([nn.Linear(hid_units, 1) for _ in range(n_networks)])
+    h_1_list = []
+    for i, adj in enumerate(adj_list):
+        h_1 = torch.squeeze(gcn_list[i](seq, adj, sparse))
+        h_1_list.append(h_1)
+    h = combine_att(h_1_list)
+    return h.detach()
+
+def run_similarity_search(test_embs, test_lbls):
+    numRows = test_embs.shape[0]
+    sim = []
+    cos_sim_array = pairwise.cosine_similarity(test_embs) - np.eye(numRows)
+    st = []
+    for N in [5, 10, 20, 50, 100]:
+        indices = np.argsort(cos_sim_array, axis=1)[:, -N:]
+        tmp = np.tile(test_lbls, (numRows, 1))
+        selected_label = tmp[np.repeat(np.arange(numRows), N), indices.ravel()].reshape(numRows, N)
+        original_label = np.repeat(test_lbls, N).reshape(numRows,N)
+        st.append(str(np.round(np.mean(np.sum((selected_label == original_label), 1) / N), 4)))
+    for i in st:
+        sim.append(float(i))
+    st = ','.join(st)
+    
+    sim_mean = np.mean(sim)
+    #print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st))
+    return sim
 
 
 class GOAL(Model):
@@ -41,7 +109,7 @@ class GOAL(Model):
         else:
             path = os.path.join(self.args.save_root, 'warmup_{}_{}_{}.pkl'.format(
                 self.args.dataset, self.args.model, self.args.layer))
-        self.encoder.load_state_dict(torch.load(path))
+        #self.encoder.load_state_dict(torch.load(path))
         self._train_full_loss()
 
     def evaluate(self, path=""):
@@ -51,7 +119,6 @@ class GOAL(Model):
         embs = self.get_embeddings()
         macro_f1s, micro_f1s, nmi, sim = evaluate(embs, self.idx_train, self.idx_val, self.idx_test, self.labels)
         return macro_f1s, micro_f1s, nmi, sim
-
     def _train_full_loss(self):
         print("Full training loss...")
         cnt_wait = 0

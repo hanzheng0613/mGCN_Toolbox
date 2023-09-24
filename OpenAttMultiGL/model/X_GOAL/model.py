@@ -38,12 +38,12 @@ class Model:
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_dblp()
             
         if args.dataset == "acm":
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, raw_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
             #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_acm_mat()
             
         if args.dataset == "imdb":            
-            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, gcn_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
+            features_list,features, data_set, num_dims, num_classes, gcn_labels, labels, raw_adj_list, adj_list, edge_list, sequence_adj,idx_train, idx_val, idx_test = self.sample_data.load_data(args.dataset)
             #idx_train, idx_val, idx_test = split_node_data(len(self.sample_data.labels),args.training_ratio,args.validing_ratio)
             #adj_list, features, labels, idx_train, idx_val, idx_test = load_imdb()
             
@@ -71,12 +71,12 @@ class Model:
         else:
             features = preprocess_features(features)
 
-        self.args.nb_nodes = adj_list[0].shape[0]
+        self.args.nb_nodes = sequence_adj[0].shape[0]
         self.args.ft_size = features.shape[1]
         self.args.nb_classes = gcn_labels.shape[1]
 
-        normalized_sequence_adj = [sequence_normalize_adj(adj) for adj in sequence_adj]
-        self.adj_list = [torch.FloatTensor(adj) for adj in normalized_sequence_adj]
+        #normalized_sequence_adj = [sequence_normalize_adj(adj) for adj in sequence_adj]
+        self.adj_list = [torch.FloatTensor(adj) for adj in sequence_adj]
         self.features = torch.FloatTensor(features)
         self.labels = torch.FloatTensor(gcn_labels).to(args.device)
         self.idx_train = torch.LongTensor(idx_train).to(args.device)

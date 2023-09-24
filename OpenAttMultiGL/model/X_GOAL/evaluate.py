@@ -14,23 +14,35 @@ from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
 from OpenAttMultiGL.model.X_GOAL import LogReg
 
 
-def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
+def evaluate(embeds,idx_train, idx_val, idx_test,labels,nb_classes,isTest=True):
     print("Evaluating...")
-    nb_classes = labels.shape[1]
-    train_embs = embeds[idx_train]
+    
+    #nb_classes = labels.shape[1]
+    train_embs = embeds[idx_train.long()]
+    #print('type1',type(idx_train))
     xent = nn.CrossEntropyLoss()
-    val_embs = embeds[idx_val]
-    test_embs = embeds[idx_test]
+    #print('type2',type(idx_val))
+    val_embs = embeds[idx_val.long()]
+    #idx_test=torch.LongTensor(idx_test)
+    #print('type3',type(idx_test))
+    test_embs = embeds[idx_test.long()]
 
     train_lbls = torch.argmax(labels[idx_train], dim=1)
     val_lbls = torch.argmax(labels[idx_val], dim=1)
     test_lbls = torch.argmax(labels[idx_test], dim=1)
 
+
+    xent = nn.CrossEntropyLoss()
+   
     accs = []
     micro_f1s = []
     macro_f1s = []
     macro_f1s_val = []
-
+    k1_list = []
+    sim_list = []
+    
+    
+    
     for _ in range(50):
         log = LogReg(train_embs.shape[1], nb_classes)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
@@ -74,7 +86,12 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
             test_accs.append(test_acc.item())
             test_macro_f1s.append(test_f1_macro)
             test_micro_f1s.append(test_f1_micro)
-
+            
+            #test_embs = np.array(test_embs.cpu())
+            #test_lbls = np.array(test_lbls.cpu())
+            
+    
+        
         max_iter = val_accs.index(max(val_accs))
         accs.append(test_accs[max_iter])
 
@@ -93,15 +110,23 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
 
     test_embs = np.array(test_embs.cpu())
     test_lbls = np.array(test_lbls.cpu())
-
-    nmi = run_kmeans(test_embs, test_lbls, nb_classes)
+    
+    #test_embs = np.array(test_embs) for jupyter notebook
+    #test_lbls = np.array(test_lbls)
+    k1 = run_kmeans(test_embs, test_lbls, nb_classes)
     sim = run_similarity_search(test_embs, test_lbls)
-    return macro_f1s, micro_f1s, nmi, sim
+    #sim = sim[0]
+    #sim_list.append(sim)
+    #k1_list.append(k1)
+    
+
+    
+    return macro_f1s, micro_f1s, k1,sim
 
 
 def run_similarity_search(test_embs, test_lbls):
     numRows = test_embs.shape[0]
-
+    sim = []
     cos_sim_array = pairwise.cosine_similarity(test_embs) - np.eye(numRows)
     st = []
     for N in [5, 10, 20, 50, 100]:
@@ -110,9 +135,12 @@ def run_similarity_search(test_embs, test_lbls):
         selected_label = tmp[np.repeat(np.arange(numRows), N), indices.ravel()].reshape(numRows, N)
         original_label = np.repeat(test_lbls, N).reshape(numRows,N)
         st.append(str(np.round(np.mean(np.sum((selected_label == original_label), 1) / N), 4)))
-
-    st_str = ','.join(st)
-    print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st_str))
+    for i in st:
+        sim.append(float(i))
+    st = ','.join(st)
+    
+    sim_mean = np.mean(sim)
+    print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st))
     return st
 
 

@@ -261,6 +261,7 @@ class mGCN(torch.nn.Module):
                 results.append(result)
         else:
             x = x_multi[test_view]
+            
             results = torch.cat(((x[edges[:, 0]]* x[edges[:, 1]]).sum(dim=-1),
                                  (x[edges_neg[:, 0]]* x[edges_neg[:, 1]]).sum(dim=-1)))
 

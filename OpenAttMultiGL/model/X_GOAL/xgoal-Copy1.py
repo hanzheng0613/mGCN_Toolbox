@@ -43,7 +43,7 @@ class XGOAL(Model):
             path = self.args.pretrained_model_path
         else:
             path = os.path.join(self.args.save_root, 'warmup_{}_{}.pkl'.format(self.args.dataset, self.args.model))
-        #self.encoder.load_state_dict(torch.load(path))
+        self.encoder.load_state_dict(torch.load(path))
         self._train_full_loss()
 
     def evaluate(self, path=""):
@@ -51,7 +51,7 @@ class XGOAL(Model):
             print("Evaluating based on {}".format(path))
             self.encoder.load_state_dict(torch.load(path))
         embs = self.get_embeddings()
-        macro_f1s, micro_f1s, nmi, sim = evaluate(embs, self.idx_train, self.idx_val, self.idx_test, self.labels,self.args.nb_classes)
+        macro_f1s, micro_f1s, nmi, sim = evaluate(embs, self.idx_train, self.idx_val, self.idx_test, self.labels)
         return macro_f1s, micro_f1s, nmi, sim
 
     def _train_full_loss(self):
