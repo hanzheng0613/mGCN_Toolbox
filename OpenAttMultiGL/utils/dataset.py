@@ -27,13 +27,13 @@ import torch.nn.functional as F
 
 class dataset():
     
-    def __init__(self, dataname): #(self, dataname, train_percent, valid_percent):
+    def __init__(self, dataname):
         self.dataname = dataname
         
-        self.truefeatures_list, self.features, self.dataset, self.num_dims, self.num_classes, self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list, self.sequence_adj,self.train_id,self.valid_id,self.test_id = self.load_data(self.dataname)
+        self.truefeatures_list, self.features, self.dataset, self.num_dims, self.num_classes,self.gcn_labels, self.labels, self.gcn_adj_list,self.adj_list, self.edge_list,self.sequence_adj,self.train_id,self.valid_id,self.test_id = self.load_data(self.dataname)
         
        
-        
+        #self.Visualization = self.visualization(self.dataname)
 
     def load_data(self, dataname):
         if self.dataname == 'amazon':

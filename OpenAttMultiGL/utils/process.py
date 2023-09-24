@@ -290,7 +290,7 @@ default_configure = {
     "hidden_units": 8,
     "dropout": 0.6,
     "weight_decay": 0.001,
-    "num_epochs": 100,
+    "num_epochs": 1000,
     "patience": 100,
 }
 
@@ -300,7 +300,7 @@ def setup(args):
     args.update(default_configure)
     set_random_seed(args["seed"])
     # args["dataset"] = "ACMRaw" if args["hetero"] else "ACM"
-    args["dataset"] = "DBLP"
+    args["dataset"] = "AMAZON"
     args["device"] = "cuda:0" if torch.cuda.is_available() else "cpu"
     args["log_dir"] = setup_log_dir(args)
     return args
@@ -837,9 +837,9 @@ def get_masked(context, edge_index, R, test_edges):
 
 def get_edges(feature, edge_index):
     edges = edge_index.transpose(0, 1).numpy()
-    print(edges.shape)
-    print((edges[:, 0].max(), edges[:, 1]))
-    print(feature.shape[0])
+    #print(edges.shape)
+    #print((edges[:, 0].max(), edges[:, 1]))
+    #print(feature.shape[0])
     adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
                         shape=(feature.shape[0], feature.shape[0]),
                         dtype=np.float32)
@@ -907,9 +907,7 @@ def split_link_data(data, test_view, neg_k, multi=False, R=0):
 def mask_test_edges(feature, edge_index, neg_num, val_prop=0.1, test_prop=0.5):
     # Function to build test set with 10% positive links
     # NOTE: Splits are randomized and results might slightly deviate from reported numbers in the paper.
-    # TODO: Clean up.
-    # random.seed(234)
-    # torch.manual_seed(234)
+
 
     edges = edge_index.transpose(0, 1).numpy()
     
@@ -958,5 +956,3 @@ def mask_test_edges(feature, edge_index, neg_num, val_prop=0.1, test_prop=0.5):
     split_edge['test']['label_neg'] = torch.zeros(split_edge['test']['edge_neg'].size(0), dtype=torch.float)
     return split_edge
 
-if __name__ == '__main__':
-    load_acm_mat()
