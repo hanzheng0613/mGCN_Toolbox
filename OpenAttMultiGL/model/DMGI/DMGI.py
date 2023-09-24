@@ -31,6 +31,10 @@ class DMGI(embedder):
         cnt_wait = 0; best = 1e9
         b_xent = nn.BCEWithLogitsLoss()
         xent = nn.CrossEntropyLoss()
+        micro = []
+        macro = []
+        sim5 = []
+        nmi = []
         for epoch in range(self.args.nb_epochs):
             xent_loss = None
             model.train()
@@ -75,13 +79,19 @@ class DMGI(embedder):
 
             loss.backward()
             optimiser.step()
-
-
-        model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths)))
+            #model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths)))
 
         # Evaluation
         model.eval()
+        #print("Epoch:",epoch) 
         evaluate(model.H.data.detach(), self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+            
+        #model.load_state_dict(torch.load('saved_model/best_{}_{}_{}.pkl'.format(self.args.dataset, self.args.embedder, self.args.metapaths)))
+        
+        # Evaluation
+        
+        
+        
 
 
 class modeler(nn.Module):

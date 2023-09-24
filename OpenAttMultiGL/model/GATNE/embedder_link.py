@@ -1,4 +1,3 @@
-# the code is based on https://github.com/pcy1302/DMGI/blob/master/evaluate.py
 import torch
 import torch.nn as nn
 
@@ -6,8 +5,10 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import normalized_mutual_info_score, pairwise, f1_score
 from sklearn.metrics import roc_auc_score
-from OpenAttMultiGL.model.hdmi.logreg_link import LogReg
+from OpenAttMultiGL.model.GATNE.logreg_link import LogReg
 import random
+
+#import tensorflow as tf
 
 def area_under_prc(pred, target):
     """
@@ -62,40 +63,37 @@ def evaluate_metrics(true, pred, test, positive_num):
         return AUC_value, hits, ap
     return AUC_value
 
-def evaluate_model(model_GNN, embeds, edge, edge_neg, common_neighbors, labels, test=False, num_pos=None):
-    model_GNN.eval()
-    logits = model_GNN(embeds, edge, edge_neg)
+def evaluate_model(model, embeds, edge, edge_neg, common_neighbors, labels, test=False, num_pos=None):
+    model.eval()
+    logits = model(embeds, edge, edge_neg)
     return evaluate_metrics(labels.cpu().numpy(), torch.sigmoid(logits).cpu().detach().numpy(), test, edge.shape[0])
 
 
 
-def evaluate(embeds, split_edges, isTest=True):
+def link_evaluate(embeds, split_edges, num_classes,isTest=True):
     training_negative = split_edges['train']['edge_neg'][np.random.randint(0, split_edges['train']['edge_neg'].shape[0], split_edges['train']['edge'].shape[0])]
     # train_embs = embeds[idx_train]
     xent = nn.BCEWithLogitsLoss()
-    # val_embs = embeds[idx_val]
-    # test_embs = embeds[idx_test]
-    #
-    # train_lbls = torch.argmax(labels[idx_train], dim=1)
-    # val_lbls = torch.argmax(labels[idx_val], dim=1)
-    # test_lbls = torch.argmax(labels[idx_test], dim=1)
-
-    accs = []
-    micro_f1s = []
-    macro_f1s = []
-    macro_f1s_val = []
-
+    
+    
+  
+    embeds = torch.from_numpy(embeds)
+    #embeds = embeds.T
+    #print("embeds:",embeds.shape)
+    
     auc_list = []
     ap_list = []
     hits_list = []
-    best_val = 0
-    best_test = 0
     best_auc = 0
     best_ap = 0
     best_hits = [0, 0, 0, 0, 0, 0, 0]
-    for epoch in range(10):
-        #print(embeds.shape)
-        log = LogReg(embeds.shape[1], 2)
+    for epoch in range(1000):
+        #print("initial",embeds.shape)
+        #num_classes = 3
+        #embeds.append(num_classes)
+        embed_dim = embeds.shape[1]
+        
+        log = LogReg(embed_dim, num_classes)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
         log.to(embeds.device)
         np.random.seed(epoch)
@@ -103,49 +101,33 @@ def evaluate(embeds, split_edges, isTest=True):
         torch.cuda.manual_seed(epoch)
         random.seed(epoch)
         
-        for iter_ in range(1000):
-            # train
-            log.train()
-            opt.zero_grad()
-            #print("embeds:",embeds.shape)
-            #print(split_edges['train']['edge'].shape)
-            #print(training_negative.shape)
-            logits = log(embeds, split_edges['train']['edge'], training_negative)
-            loss = xent(logits, split_edges['train']['label'])
+        
+        
+        log.train()
+        opt.zero_grad()
+            
+            
+        logits = log(embeds, split_edges['train']['edge'], training_negative)
+        loss = xent(logits, split_edges['train']['label'])
 
-            loss.backward()
-            opt.step()
+        loss.backward(retain_graph=True)
+        opt.step()
 
-            # val
-            #print(type(split_edges['valid']['label']))
-            #print(split_edges['valid']['label'].shape)
-        auc, hits, ap = evaluate_model(log, embeds, split_edges['valid']['edge'], split_edges['valid']['edge_neg'], None,
-                              split_edges['valid']['label'],test= True)
-            # if epoch == epochs - 1:
-            #     temp = evaluate_model(split_edges['test']['edge'], split_edges['test']['edge_neg'], None,
-            #                           split_edges['test']['label'], test=True)
-            #     print("AUC last:", temp)
-
-        if auc > best_auc and ap >best_ap:
+            
+        auc, hits, ap = evaluate_model(log, embeds, split_edges['test']['edge'], split_edges['test']['edge_neg'],
+                                                      None,
+                                                      split_edges['test']['label'], test=True)
+           
+        if auc > best_auc:
             best_auc = auc
-            best_ap = ap
 
-            best_ap = float(best_ap)
+            
             print('Epoch:', epoch)
             print("Best auc:", best_auc)
-            #print("Best Test:", best_test)
-            print("Best ap:", best_ap)
-        #print(best_hits)
-        
+            print("Best ap:", float(ap))
         auc_list.append(auc)
-        ap_list.append(ap)
-        hits_list.append(hits)
-
-        #print(best_hits)
-        #print("Best ap:", best_ap)
-        #auc_list.append(best_auc)
-        #ap_list.append(best_ap)
-        #hits_list.append(best_hits)
+        ap_list.append(float(ap))
+        
 
     return auc_list, ap_list, hits_list
 

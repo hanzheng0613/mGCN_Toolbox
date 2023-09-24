@@ -32,8 +32,12 @@ class HDMI(embedder):
     def training(self):
         features = self.features.to(self.args.device)
         adj_list = [adj.to(self.args.device) for adj in self.adj_list]
-
+        micro = []
+        macro = []
+        sim5 = []
+        nmi = []
         print("Started training...")
+        #print(self.args.ft_size)
         model = modeler(self.args.ft_size, self.args.hid_units, len(adj_list), self.args.same_discriminator)\
             .to(self.args.device)
         optimiser = torch.optim.Adam(model.parameters(), lr=self.args.lr)
@@ -80,18 +84,27 @@ class HDMI(embedder):
 
             loss.backward()
             optimiser.step()
-
-        print(loss_e, loss_i, loss_j, loss_e_fusion, loss_i_fusion, loss_j_fusion)
-
-        # save
-        model.load_state_dict(torch.load('saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder)))
-
-        # evaluation
-        print("Evaluating...")
         model.eval()
         embeds = model.embed(features, adj_list, self.args.sparse)
-        macro_f1s, micro_f1s, k1, sim = evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels,)
-        return macro_f1s, micro_f1s, k1, sim
+        #print("Epoch:",epoch) 
+        macro_f1s, micro_f1s, k1 = evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels, self.args.device)
+        #f1_macro = np.mean(macro_f1s)
+        #f1_micro = np.mean(micro_f1s)
+        #macro.append(f1_macro)
+        #micro.append(f1_micro)
+        #nmi.append(k1)
+        #sim5.append(sim)
+        #print(loss_e, loss_i, loss_j, loss_e_fusion, loss_i_fusion, loss_j_fusion)
+            
+        # save
+        #model.load_state_dict(torch.load('saved_model/best_{}_{}.pkl'.format(self.args.dataset, self.args.embedder)))
+
+        # evaluation
+        
+        #print("Evaluating...")
+        
+        #macro_f1s, micro_f1s, k1, sim = evaluate(embeds, self.idx_train, self.idx_val, self.idx_test, self.labels,)
+        return macro,micro,k1
 
     def get_loss(self, logits):
         """

@@ -33,7 +33,6 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
     macro_f1s = []
     macro_f1s_val = []
 
-    
     for _ in range(50):
         log = LogReg(train_embs.shape[1], nb_classes)
         opt = torch.optim.Adam(log.parameters(), lr=0.1)
@@ -77,12 +76,7 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
             test_accs.append(test_acc.item())
             test_macro_f1s.append(test_f1_macro)
             test_micro_f1s.append(test_f1_micro)
-            
-            
-    #print('test embs:  ', test_embs.shape)
-    #print('test lbls:  ', test_lbls.shape)
-            
-            
+
         max_iter = val_accs.index(max(val_accs))
         accs.append(test_accs[max_iter])
 
@@ -98,16 +92,15 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, isTest=True):
             np.mean(macro_f1s), np.std(macro_f1s), np.mean(micro_f1s), np.std(micro_f1s)))
     else:
         return np.mean(macro_f1s_val), np.mean(macro_f1s)
-    
+
     test_embs = np.array(test_embs.cpu())
     test_lbls = np.array(test_lbls.cpu())
+    #print('test embs:  ', test_embs.shape)
+    #print('test lbls:  ', test_lbls.shape)
     k1 = run_kmeans(test_embs, test_lbls, nb_classes)
-    run_similarity_search(test_embs, test_lbls)
-    #sim = sim[0]
-    return macro_f1s, micro_f1s, k1
-    
-    
-    #return macro_f1s, micro_f1s, k1
+    sim = run_similarity_search(test_embs, test_lbls)
+    sim = sim[0]
+    return macro_f1s, micro_f1s, k1, sim
 
 
 def run_similarity_search(test_embs, test_lbls):
@@ -127,7 +120,7 @@ def run_similarity_search(test_embs, test_lbls):
     
     sim_mean = np.mean(sim)
     print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st))
-    #return sim
+    return sim
 
 def run_kmeans(x, y, k):
     estimator = KMeans(n_clusters=k,n_init=10)
@@ -142,4 +135,5 @@ def run_kmeans(x, y, k):
     mean = np.mean(NMI_list)
     std = np.std(NMI_list)
     print('\t[Clustering] NMI: {:.4f} | {:.4f}'.format(mean, std))
-    return NMI_list
+    return mean
+

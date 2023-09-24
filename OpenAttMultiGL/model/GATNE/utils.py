@@ -8,7 +8,11 @@ import argparse
 import multiprocessing
 from collections import defaultdict
 from operator import index
-
+import torch 
+torch.manual_seed(0)
+torch.cuda.manual_seed_all(0)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 import numpy as np
 from six import iteritems
 from sklearn.metrics import (auc, f1_score, precision_recall_curve,
@@ -29,7 +33,7 @@ class Vocab(object):
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--input', type=str, default='Amazon',
+    parser.add_argument('--input', type=str, default='imdb',
                         help='Input dataset path')
     
     parser.add_argument('--features', type=str, default=None,
@@ -92,7 +96,7 @@ def get_G_from_edges(edges):
         edge_dict[v].add(u)
     return edge_dict
 
-def load_txt_training_data(f_name):
+def load_training_data(f_name):
     #print('We are loading data from:', f_name)
     edge_data_by_type = dict()
     all_nodes = list()
@@ -110,7 +114,7 @@ def load_txt_training_data(f_name):
     return edge_data_by_type
 
 
-def load_txt_testing_data(f_name):
+def load_testing_data(f_name):
     #print('We are loading data from:', f_name)
     true_edge_data_by_type = dict()
     false_edge_data_by_type = dict()
@@ -132,7 +136,7 @@ def load_txt_testing_data(f_name):
     all_nodes = list(set(all_nodes))
     return true_edge_data_by_type, false_edge_data_by_type
 
-def load_txt_node_type(f_name):
+def load_node_type(f_name):
     #print('We are loading node type from:', f_name)
     node_type = {}
     with open(f_name, 'r') as f:
@@ -141,7 +145,7 @@ def load_txt_node_type(f_name):
             node_type[items[0]] = items[1]
     return node_type
 
-def load_txt_feature_data(f_name):
+def load_feature_data(f_name):
     feature_dic = {}
     with open(f_name, 'r') as f:
         first = True
@@ -235,7 +239,7 @@ def generate(network_data, num_walks, walk_length, schema, file_name, window_siz
         all_walks = load_walks(walk_file)
     else:
         all_walks = generate_walks(network_data, num_walks, walk_length, schema, file_name, num_workers)
-        save_walks('mGCN_Toolbox/data/GATNE/'+file_name + '/walks.txt', all_walks)
+        save_walks('OpenAttMultiGL/data/GATNE/'+file_name + '/walks.txt', all_walks)
     vocab, index2word = generate_vocab(all_walks)
     train_pairs = generate_pairs(all_walks, vocab, window_size, num_workers)
 
@@ -270,10 +274,22 @@ def get_score(local_model, node1, node2):
         pass
 
 
-def evaluate(model, true_edges, false_edges,num_classes):
+def evaluatee(model, true_edges, false_edges,dataset,embeds):
     true_list = list()
     prediction_list = list()
     true_num = 0
+    
+    labels = torch.FloatTensor(dataset.gcn_labels)
+    idx_train = torch.LongTensor(dataset.train_id)
+    idx_val = torch.LongTensor(dataset.valid_id)
+    idx_test = torch.LongTensor(dataset.test_id)
+    
+    #idx_test = idx_test[:200]
+    test_embs = embeds.reshape(-1,1)
+    test_embs = test_embs.reshape((4,50))
+    #print('labels',labels.shape)
+    test_lbls = torch.argmax(labels[idx_test], dim=0)
+    #print('test_label', test_lbls.shape)
     for edge in true_edges:
         tmp_score = get_score(model, str(edge[0]), str(edge[1]))
         if tmp_score is not None:
@@ -290,7 +306,11 @@ def evaluate(model, true_edges, false_edges,num_classes):
     sorted_pred = prediction_list[:]
     sorted_pred.sort()
     threshold = sorted_pred[-true_num]
-
+    
+    
+    #print('s: ', embeds.shape())
+    #test_embs = np.asarray(embeds)
+    
     y_pred = np.zeros(len(prediction_list), dtype=np.int32)
     for i in range(len(prediction_list)):
         if prediction_list[i] >= threshold:
@@ -299,8 +319,50 @@ def evaluate(model, true_edges, false_edges,num_classes):
     y_true = np.array(true_list)
     y_scores = np.array(prediction_list)
     ps, rs, _ = precision_recall_curve(y_true, y_scores)
-    macro = f1_score(y_true, y_pred,average="macro")
-    micro = f1_score(y_true, y_pred,average="micro")
     
-    return macro, micro
+    micro = f1_score(y_true, y_pred,average="micro")
+    macro = f1_score(y_true, y_pred,average="macro")
+    #sim = run_similarity_search(test_embs, test_lbls)
+    
+    test_embs = np.array(test_embs)
+    test_lbls = np.array(test_lbls)
+    print('test embs:  ', test_embs.shape)
+    print('test lbls:  ', test_lbls.shape)
+    nmi = run_kmeans(test_embs, test_lbls,1)
+    #idx_test = idx_test[:200]
+    #test_lbls = torch.argmax(labels[idx_test], dim=0)
+    sim = run_similarity_search(test_embs, test_lbls)
+    return micro,macro
 
+
+def run_similarity_search(test_embs, test_lbls):
+    numRows = test_embs.shape[0]
+
+    cos_sim_array = pairwise.cosine_similarity(test_embs) - np.eye(numRows)
+    st = []
+    for N in [5, 10, 20, 50, 100]:
+        indices = np.argsort(cos_sim_array, axis=1)[:, -N:]
+        tmp = np.tile(test_lbls, (numRows, 1))
+        #selected_label = tmp[np.repeat(np.arange(numRows), N)[:,None], indices.ravel()].reshape(numRows, N)
+        selected_label = tmp[np.repeat(np.arange(1), N)].reshape(numRows, N)
+        original_label = np.repeat(test_lbls, N).reshape(numRows,N)
+        st.append(str(np.round(np.mean(np.sum((selected_label == original_label), 1) / N), 4)))
+
+    st = ','.join(st)
+    print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st))
+
+
+def run_kmeans(x, y, k):
+    estimator = KMeans(n_clusters=k)
+
+    NMI_list = []
+    for i in range(10):
+        estimator.fit(x)
+        y_pred = estimator.predict(x)
+        s = normalized_mutual_info_score(y, y_pred, average_method='arithmetic')
+        NMI_list.append(s)
+
+    mean = np.mean(NMI_list)
+    std = np.std(NMI_list)
+    print('\t[Clustering] NMI: {:.4f} | {:.4f}'.format(mean, std))
+    return NMI_list

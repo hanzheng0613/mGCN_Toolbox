@@ -77,7 +77,8 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, device, isTest=True):
             test_macro_f1s.append(test_f1_macro)
             test_micro_f1s.append(test_f1_micro)
 
-
+            
+            
         max_iter = val_accs.index(max(val_accs))
         accs.append(test_accs[max_iter])
 
@@ -101,10 +102,12 @@ def evaluate(embeds, idx_train, idx_val, idx_test, labels, device, isTest=True):
 
     run_kmeans(test_embs, test_lbls, nb_classes)
     run_similarity_search(test_embs, test_lbls)
-
+    
+    
+    
 def run_similarity_search(test_embs, test_lbls):
     numRows = test_embs.shape[0]
-
+    sim = []
     cos_sim_array = pairwise.cosine_similarity(test_embs) - np.eye(numRows)
     st = []
     for N in [5, 10, 20, 50, 100]:
@@ -113,13 +116,16 @@ def run_similarity_search(test_embs, test_lbls):
         selected_label = tmp[np.repeat(np.arange(numRows), N), indices.ravel()].reshape(numRows, N)
         original_label = np.repeat(test_lbls, N).reshape(numRows,N)
         st.append(str(np.round(np.mean(np.sum((selected_label == original_label), 1) / N),4)))
+    for i in st:
+        sim.append(float(i))
 
     st = ','.join(st)
+    sim_mean = np.mean(sim)
     print("\t[Similarity] [5,10,20,50,100] : [{}]".format(st))
-
+    return sim
 
 def run_kmeans(x, y, k):
-    estimator = KMeans(n_clusters=k)
+    estimator = KMeans(n_clusters=k,n_init=10)
 
     NMI_list = []
     for i in range(10):
@@ -130,5 +136,7 @@ def run_kmeans(x, y, k):
         NMI_list.append(s1)
 
     s1 = sum(NMI_list) / len(NMI_list)
-
+    mean = np.mean(NMI_list)
+    std = np.std(NMI_list)
     print('\t[Clustering] NMI: {:.4f}'.format(s1))
+    return mean
