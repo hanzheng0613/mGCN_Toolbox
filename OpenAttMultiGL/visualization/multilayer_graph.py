@@ -149,7 +149,7 @@ class LayeredNetworkGraph(object):
         edge_y = []
         edge_z = []
         self.edge_trace = None
-        self.edges_position = self.edges_positions[1500:]
+        self.edges_position = self.edges_positions
         for i in range(len(self.edges_position)):
             x0, y0, z0= self.edges_position[i][0]
             x1, y1, z1= self.edges_position[i][1]
@@ -167,7 +167,8 @@ class LayeredNetworkGraph(object):
             x=edge_x, y=edge_y, z= edge_z,
             line=dict(width=0.5, color='#888'),
             hoverinfo='none',
-            mode='lines')
+            mode='lines',
+        )
         
     def draw_edges_between_layers(self, edges_between_layers,*args, **kwargs):
         edge_between_layers_x = []
@@ -213,9 +214,11 @@ class LayeredNetworkGraph(object):
             for node, adjacencies in enumerate(i.adjacency()):
                 node_adjacencies.append(len(adjacencies[1]))
                 attri_num = "{:.4f}".format(self.graphs_attribute[node].max())
+                #node_text.append('Node index: '+ str(node)+'<br>'+'Attribute: ' + '[' + str(attri_num)+','+ str(attri_num)+']'
+                                #+'<br>'+'Degree: '+str(len(adjacencies[1]))+'<br>'+'Random Walk Occupation centrality: '
+                                #+ str(node_rwoc[node]))
                 node_text.append('Node index: '+ str(node)+'<br>'+'Attribute: ' + '[' + str(attri_num)+','+ str(attri_num)+']'
-                                +'<br>'+'Degree: '+str(len(adjacencies[1]))+'<br>'+'Random Walk Occupation centrality: '
-                                + str(node_rwoc[node]))
+                                +'<br>'+'Degree: '+str(len(adjacencies[1])))
         
         self.node_trace.marker.color = node_adjacencies
 
@@ -225,7 +228,7 @@ class LayeredNetworkGraph(object):
 
     def draw(self):
 
-        fig = go.Figure(data=[self.edge_trace, self.node_trace,self.edge_between_layers_trace],
+        fig = go.Figure(data=[ self.node_trace,self.edge_trace,self.edge_between_layers_trace],
              layout=go.Layout(
                 title='<br>Multilayer network graph made with Python',
                 titlefont_size=16,
@@ -251,16 +254,16 @@ class LayeredNetworkGraph(object):
 
 if __name__ == '__main__':
     
-    adj_list, truefeatures, label, idx_train, idx_val, idx_test = load_acm_mat(3)
+    t = dataset('amazon')
 
     # Generating sample data
 
-    a1 = adj_list[0]
-    a2 = adj_list[1]
+    a1 = t.gcn_adj_list[0]
+    a2 = t.gcn_adj_list[1]
     a1_mini = a1[0:100,0:100]
     a2_mini = a2[0:100,0:100]
     
-    features = truefeatures[0:100,0:100]
+    features = t.features[0:100,0:100]
     attribute = preprocess_features(features)
 
 
