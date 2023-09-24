@@ -1,8 +1,8 @@
-# mGCN_Toolbox
+# OpenAttMultiGL
 
-## mGCN: multilayer graph convolutional network toolbox
+## OpenAttMultiGL: An Open Source Toolbox for Attributed Multi-layer Graph Learning
 
-Here is a package for loading and splitting data for mGCN or GCN implementation
+
 
 
 ## Acknowledgement
