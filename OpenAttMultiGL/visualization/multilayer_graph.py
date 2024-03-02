@@ -16,8 +16,7 @@ import holoviews as hv
 
 from OpenAttMultiGL.visualization.process import *
 
-#from OpenAttMultiGL.utils.dataset import dataset
-#from OpenAttMultiGL.utils.centrality import *
+
 
 
 
@@ -26,7 +25,7 @@ from OpenAttMultiGL.visualization.process import *
 
 class LayeredNetworkGraph(object):
 
-    def __init__(self, graphs, graphs_attribute,dataname,centrality,layout=nx.random_layout):
+    def __init__(self, graphs, graphs_attribute,layout=nx.random_layout):
         """Given an ordered list of graphs [g1, g2, ..., gn] that represent
         different layers in a multi-layer network, plot the network in
         3D with the different layers separated along the z-axis.
@@ -54,18 +53,17 @@ class LayeredNetworkGraph(object):
 
         # book-keeping
         self.graphs = graphs
-        self.dataname = dataname
-        self.centrality = centrality
+        
         self.graphs_attribute = graphs_attribute
         self.layout = layout
-        #self.node_rwoc = self.random_walk_occupation_centrality(self.graphs_attribute)
+        self.node_rwoc = self.random_walk_occupation_centrality(self.graphs_attribute)
         self.get_nodes_and_edges_layout()
         self.get_edges_between_layers()
         # create internal representation of nodes and edges
         self.draw_nodes(self.nodes_positions)
         self.draw_edges(self.edges_positions)
         self.draw_edges_between_layers(self.edges_between_layers)
-        self.add_interaction(self.dataname,self.graphs_attribute,self.centrality)
+        self.add_interaction(self.graphs_attribute,self.node_rwoc)
         
         self.draw()
         
@@ -133,13 +131,13 @@ class LayeredNetworkGraph(object):
             #'Greys' | 'YlGnBu' | 'Greens' | 'YlOrRd' | 'Bluered' | 'RdBu' |
             #'Reds' | 'Blues' | 'Picnic' | 'Rainbow' | 'Portland' | 'Jet' |
             #'Hot' | 'Blackbody' | 'Earth' | 'Electric' | 'Viridis' |
-            colorscale='Blues',
+            colorscale='RdBu',
             reversescale=True,
             color=[],
             size=5,
             colorbar=dict(
             thickness=15,
-            title='Centrality',
+            title='Degree',
             xanchor='left',
             titleside='right'
             ),
@@ -197,46 +195,42 @@ class LayeredNetworkGraph(object):
             mode='lines',
             )
         
+    def random_walk_occupation_centrality(self,graphs_attribute):
+        weight=self.graphs_attribute.sum()
+        size = self.graphs_attribute.shape[0]
+        rWOC=np.zeros(size)
+        for i in range (size):
+            rWOC[i]=self.graphs_attribute[i,:].sum()/weight
+        
+        return rWOC
     
-    
-    def add_interaction(self,dataname,graphs_attribute,centrality):
+    def add_interaction(self,graphs_attribute,node_rwoc):
         node_text = []
         node_adjacencies = []
-        
-                
-        for i in self.graphs:            
+
+        for i in self.graphs:
+
+            
             for node, adjacencies in enumerate(i.adjacency()):
-                #print('node', node)
-                
                 node_adjacencies.append(len(adjacencies[1]))
                 attri_num = "{:.4f}".format(self.graphs_attribute[node].max())
                 #node_text.append('Node index: '+ str(node)+'<br>'+'Attribute: ' + '[' + str(attri_num)+','+ str(attri_num)+']'
                                 #+'<br>'+'Degree: '+str(len(adjacencies[1]))+'<br>'+'Random Walk Occupation centrality: '
                                 #+ str(node_rwoc[node]))
                 node_text.append('Node index: '+ str(node)+'<br>'+'Attribute: ' + '[' + str(attri_num)+','+ str(attri_num)+']'
-                                +'<br>'+'Degree: '+str(len(adjacencies[1]))+'<br>'+'RWOC: '+str(round(centrality[node],5)))
-        #t = dataset(dataname)
-        #print('ssss',len(self.graphs))
-        #print('sssdsafasf',len(centrality))
-        default = centrality
-        for i in range(len(self.graphs)-1):
-            
-            for j in range(len(default)):
-                centrality = np.append(centrality,centrality[j])
-        #print('centrality: ', len(centrality))
-        self.node_trace.marker.color=centrality
+                                +'<br>'+'Degree: '+str(len(adjacencies[1]))+'<br>'+'Random Walk Occupation centrality: ')
         
-        #print('node_adjacencies: ', node_adjacencies)
-        #print(type(node_adjacencies))
+        self.node_trace.marker.color = node_adjacencies
+
         self.node_trace.text = node_text
     
     
 
     def draw(self):
 
-        fig = go.Figure(data=[self.node_trace,self.edge_trace,self.edge_between_layers_trace],
+        fig = go.Figure(data=[ self.node_trace,self.edge_trace,self.edge_between_layers_trace],
              layout=go.Layout(
-                title='<br>Multilayer Network Visualization',
+                title='<br>Multilayer network graph made with Python',
                 titlefont_size=16,
                 showlegend=False,
                 hovermode='closest',
@@ -272,13 +266,12 @@ if __name__ == '__main__':
     features = t.features[0:100,0:100]
     attribute = preprocess_features(features)
 
-    c = centrality_implementation('amazon')
-    f = RWOC(c,'amazon')
+
     # define graphs
     G = nx.from_scipy_sparse_array(a1_mini)
 
     I = nx.from_scipy_sparse_array(a2_mini)
     # initialise figure and plot
     
-    LayeredNetworkGraph([G,I],graphs_attribute=attribute,dataname='amazon',centrality = f,layout=nx.random_layout)
+    LayeredNetworkGraph([G,I],graphs_attribute=attribute,layout=nx.random_layout)
     # Make interactive nodes here
